@@ -1,0 +1,20 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Databases (Local overrides)
+*.sqlite3
+
+# Django local settings / secrets (if any)
+.env
+local_settings.py
+
+# Operating System Files
+.DS_Store
+Thumbs.db
