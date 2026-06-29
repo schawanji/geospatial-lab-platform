@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CEMS Rapid Mapping Activations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f7f7f7;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #222;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f2f2f2;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #eee;
+        }
+    </style>
+</head>
+<body>
+
+<h1>CEMS Rapid Mapping Activations</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Sub-category</th>
+            <th>Country</th>
+            <th>Activation Time</th>
+            <th>Closed</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for activation in activations %}
+            <tr>
+                <td>
+                    <a href="{% url 'proximity_alerts:activation_detail' activation.code %}">
+                        {{ activation.code }}
+                    </a>
+                </td>
+                <td>{{ activation.name }}</td>
+                <td>{{ activation.category }}</td>
+                <td>{{ activation.sub_category }}</td>
+                <td>
+                    {% if activation.countries %}
+                        {{ activation.countries }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if activation.activation_time %}
+                        {{ activation.activation_time }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if activation.closed %}
+                        <span class="badge">Closed</span>
+                    {% else %}
+                        <span class="badge">Open</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="7">No activations found.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>

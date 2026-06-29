@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ activation.code }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f7f7f7;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            max-width: 900px;
+        }
+
+        dt {
+            font-weight: bold;
+            margin-top: 12px;
+        }
+
+        dd {
+            margin-left: 0;
+            margin-bottom: 8px;
+        }
+
+        pre {
+            background: #eee;
+            padding: 12px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+<p>
+    <a href="{% url 'proximity_alerts:activation_list' %}">Back to activations</a>
+</p>
+
+<div class="card">
+    <h1>{{ activation.code }} - {{ activation.name }}</h1>
+
+    <dl>
+        <dt>Category</dt>
+        <dd>{{ activation.category }}</dd>
+
+        <dt>Sub-category</dt>
+        <dd>{{ activation.sub_category }}</dd>
+
+        <dt>Reason</dt>
+        <dd>{{ activation.reason }}</dd>
+
+        <dt>Countries</dt>
+        <dd>{{ activation.countries }}</dd>
+
+        <dt>Continent</dt>
+        <dd>{{ activation.continent }}</dd>
+
+        <dt>Activation time</dt>
+        <dd>{{ activation.activation_time }}</dd>
+
+        <dt>Event time</dt>
+        <dd>{{ activation.event_time }}</dd>
+
+        <dt>Closed</dt>
+        <dd>{{ activation.closed }}</dd>
+
+        <dt>Centroid</dt>
+        <dd>{{ activation.centroid }}</dd>
+
+        <dt>Extent</dt>
+        <dd>{{ activation.extent }}</dd>
+    </dl>
+</div>
+
+</body>
+</html>

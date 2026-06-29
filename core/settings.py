@@ -85,7 +85,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis', # Native PostGIS Engine
-        'NAME': 'geolab_db',
+        'NAME': 'geolab_app2_db',
         'USER': 'geo_admin',
         'PASSWORD': 'secretpassword',
         'HOST': 'localhost',

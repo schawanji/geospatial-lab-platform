@@ -1,20 +1,70 @@
-# Virtual Environment
-venv/
-ENV/
-env/
-
-# Python Cache
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
 
-# Databases (Local overrides)
-*.sqlite3
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
 
-# Django local settings / secrets (if any)
+# Environment variables / secrets
 .env
-local_settings.py
+.env.*
+!.env.example
 
-# Operating System Files
+# Django local database
+db.sqlite3
+db.sqlite3-journal
+
+# Django generated/static/media files
+staticfiles/
+media/
+uploaded/
+uploads/
+
+# Logs
+*.log
+logs/
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.cache/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
 .DS_Store
 Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Node/frontend dependencies, if you use them
+node_modules/
+dist/
+build/
+
+# GIS / large local data files
+*.tif
+*.tiff
+*.gpkg
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.geojson
+*.mbtiles
+
+# Local settings files
+local_settings.py
+settings_local.py
