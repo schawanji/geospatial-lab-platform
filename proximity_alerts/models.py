@@ -31,5 +31,18 @@ class CEMSRActivation(models.Model):
      closed = models.BooleanField(default=False)
      
      infobulletins = models.JSONField(default=list, blank=True)
-    
-    
+     products_path = models.CharField(max_length=1000, null=True, blank=True)
+     
+class CEMSRAOI(models.Model):
+     """Area of interest belonging to a CEMS activation."""
+     code = models.ForeignKey( CEMSRActivation, on_delete=models.CASCADE, related_name="aois",)
+     
+     
+     aoi_number = models.PositiveIntegerField()
+     aoi_name = models.CharField(max_length=255)
+
+     blp_path = models.CharField(max_length=1000, null=True, blank=True)
+     geom = models.MultiPolygonField(srid=4326, null=True, blank=True)
+     
+ 
+      

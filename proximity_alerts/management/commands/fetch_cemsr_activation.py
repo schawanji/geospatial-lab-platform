@@ -15,8 +15,9 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
 from django.contrib.gis.geos import GEOSException, GEOSGeometry, MultiPolygon
+from decimal import Decimal, InvalidOperation
 
-from proximity_alerts.models import CEMSRActivation 
+from proximity_alerts.models import CEMSRActivation ,CEMSRAOI
 
 
 
@@ -174,9 +175,10 @@ class CEMSActivationImporter:
     
     def import_activation_payload(self, *, payload: dict[str, Any], replace: bool = False):
         code = str(get_any(payload, "code") or "").strip().upper()
+        
         if not code:
             raise CEMSImportError("Activation payload is missing code")
-        
+        # 1. Map and filter fields for the parent Activation
         activation_defaults = filter_model_defaults(
             CEMSRActivation,
             {
@@ -207,8 +209,8 @@ class CEMSActivationImporter:
             },
         )
         
-        self.stdout.write(self.style.NOTICE(f"Successfully Fetched {code}..."))
-        # 1. Capture the response as a single variable
+        #self.stdout.write(self.style.NOTICE(f"Successfully Fetched {code}..."))
+      # 2. Save the parent Activation and capture the response as a single variable 
         db_response = CEMSRActivation.objects.update_or_create(
             code=code,
             defaults=activation_defaults,
@@ -219,21 +221,59 @@ class CEMSActivationImporter:
 
         activation, _created = db_response
 
-        self.stdout.write(
-        self.style.SUCCESS(
-        f"Saved activation {activation.code}, created={_created}"
-         )
-            )
+       # self.stdout.write( self.style.SUCCESS( f"Saved activation {activation.code}, created={_created}"))
+        
+        
         stats = {
-        "aois": 0,
-        "products": 0,
-        "versions": 0,
-        "images": 0,
-        "layers": 0, }
+            "aois": 0,
+            "products": 0,
+            "versions": 0,
+            "images": 0,
+            "layers": 0, 
+            }
+        
+        print('Whats up')
+        
+        aois_payload = get_any(payload, "aois", "aoi", "areasOfInterest") or []
+
+        if isinstance(aois_payload, dict):
+            aois_payload = [aois_payload]
+
+        for aoi_payload in aois_payload:
+            self.import_aoi(
+                activation=activation,
+                payload=aoi_payload,
+            )
+            stats["aois"] += 1
 
         return activation, stats
 
-       
+    def import_aoi(self, *, activation: CEMSRActivation, payload: dict[str, Any]):
+        self.stdout.write(self.style.NOTICE(f"Saved AOIs {activation}"))
+        aoi_number = to_int(get_any(payload, "number", "aoiNumber", "aoi_number"), default=0)
+        extent = parse_polygonal_wkt(get_any(payload, "extent", "geom"))
+        
+        self.stdout.write(self.style.NOTICE(f"Saved AOIs {extent}"))
+        defaults = filter_model_defaults(
+            CEMSRAOI,
+            {
+                "aoi_name": get_any(payload, "name", "aoiName", "aoi_name") or f"AOI {aoi_number}",
+                "blp_path": get_any(payload, "blpPath", "blp_path"),
+                "is_real_extent": to_bool(get_any(payload, "isRealExtent", "is_real_extent"), default=True),
+                "sqkm": to_decimal(get_any(payload, "sqkm", "sqKm", "areaSqKm", "area_sqkm")),
+                "extent": extent,
+                "geom": extent,
+                "raw_payload": payload,
+                
+            },
+        )
+
+        aoi, _created = CEMSRAOI.objects.update_or_create(
+            code=activation,
+            aoi_number=aoi_number,
+            defaults=defaults,
+        )
+        return aoi
 
 def normalize_base_url(base_url: str) -> str:
     base_url = (base_url or DEFAULT_BASE_URL).strip()
@@ -346,3 +386,22 @@ def to_bool(value: Any, *, default: bool = False) -> bool:
     if normalized in {"0", "false", "f", "no", "n"}:
         return False
     return default
+
+
+
+def to_int(value: Any, *, default: int | None = None) -> int | None:
+    if value is None or value == "":
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def to_decimal(value: Any) -> Decimal | None:
+    if value is None or value == "":
+        return None
+    try:
+        return Decimal(str(value))
+    except (InvalidOperation, ValueError):
+        return None
