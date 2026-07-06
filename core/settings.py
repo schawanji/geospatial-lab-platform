@@ -32,6 +32,65 @@ ALLOWED_HOSTS = os.getenv(
     "localhost,127.0.0.1"
 ).split(",")
 
+def env(name: str, default=None, *, required: bool = False):
+    value = os.getenv(name, default)
+
+    if required and (value is None or value == ""):
+        raise RuntimeError(f"Missing required environment variable: {name}")
+
+    return value
+
+
+def env_path(name: str, default: str) -> Path:
+    value = env(name, default)
+    path = Path(value)
+
+    if path.is_absolute():
+        return path
+
+    return BASE_DIR / path
+
+# CEMS local data
+CEMS_DATA_ROOT = env_path("CEMS_DATA_ROOT", "data/cems")
+
+
+# GeoServer
+GEOSERVER_URL = env("GEOSERVER_URL", "http://localhost:8080/geoserver")
+GEOSERVER_USER = env("GEOSERVER_USER", required=True)
+GEOSERVER_PASSWORD = env("GEOSERVER_PASSWORD", required=True)
+
+GEOSERVER_WORKSPACE = env("GEOSERVER_WORKSPACE", "cems")
+GEOSERVER_DATASTORE = env("GEOSERVER_DATASTORE", "cems_postgis")
+
+
+# PostGIS connection for ogr2ogr.
+# This must be reachable from where the Django management command runs.
+OGR_POSTGIS_HOST = env("OGR_POSTGIS_HOST", "localhost")
+OGR_POSTGIS_PORT = env("OGR_POSTGIS_PORT", "5432")
+OGR_POSTGIS_DB = env("OGR_POSTGIS_DB", required=True)
+OGR_POSTGIS_USER = env("OGR_POSTGIS_USER", required=True)
+OGR_POSTGIS_PASSWORD = env("OGR_POSTGIS_PASSWORD", required=True)
+
+CEMS_OGR_PG_CONN = (
+    "PG:"
+    f"host={OGR_POSTGIS_HOST} "
+    f"port={OGR_POSTGIS_PORT} "
+    f"dbname={OGR_POSTGIS_DB} "
+    f"user={OGR_POSTGIS_USER} "
+    f"password={OGR_POSTGIS_PASSWORD}"
+)
+
+
+# PostGIS connection as seen from GeoServer.
+# If GeoServer is in Docker, host is usually the Postgres service name.
+GEOSERVER_POSTGIS = {
+    "host": env("GEOSERVER_POSTGIS_HOST", "postgis"),
+    "port": env("GEOSERVER_POSTGIS_PORT", "5432"),
+    "database": env("GEOSERVER_POSTGIS_DB", required=True),
+    "schema": env("GEOSERVER_POSTGIS_SCHEMA", "public"),
+    "user": env("GEOSERVER_POSTGIS_USER", required=True),
+    "password": env("GEOSERVER_POSTGIS_PASSWORD", required=True),
+}
 # Application definition
 
 INSTALLED_APPS = [
