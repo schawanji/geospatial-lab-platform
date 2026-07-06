@@ -39,7 +39,7 @@ class CEMSRActivation(models.Model):
 
     infobulletins = models.JSONField(default=list, blank=True)
     products_path = models.CharField(max_length=1000, null=True, blank=True) #"The path to the zipfile containing all the last version of the products of the activation"
-    
+    related_events = models.CharField(max_length=1000, null=True, blank=True)
     class Meta:
         ordering = ["-activation_time", "code"]
         verbose_name = "CEMS activation"
@@ -121,12 +121,16 @@ class CEMSRProductLayer(models.Model):
     )
      name = models.CharField(max_length=255,null=True)
      layer_type = models.CharField(max_length=100, null=True, blank=True)
+     layer_json_path = models.CharField(max_length=1000, null=True, blank=True) # Impact vectors 
+     layer_format = models.CharField(max_length=10, null=True, blank=True)
+     layer_sld_path=models.CharField(max_length=1000, null=True, blank=True)
+     
      
      class Meta:
         ordering = ["product", "name"]
         
      def __str__(self):
-        return self.name
+        return self.name or f"Layer {self.pk}"
    
 class CEMSRProductVersion(models.Model):
     product = models.ForeignKey(
@@ -135,10 +139,10 @@ class CEMSRProductVersion(models.Model):
         related_name="versions"
     )
     uuid = models.UUIDField(unique=True,null=True)
-    status_code = models.CharField()
-    reason = models.TextField()
-    number = models.PositiveIntegerField()
-    delivery_time = models.DateTimeField(null=True)
+    status_code = models.CharField(max_length=100, null=True, blank=True)
+    reason = models.TextField(null=True, blank=True)
+    number = models.PositiveIntegerField(null=True, blank=True)
+    delivery_time = models.DateTimeField(null=True, blank=True)
     
     class Meta:
         ordering = ["product", "number"]
@@ -170,3 +174,5 @@ class CEMSRProductImage(models.Model):
 
     def __str__(self):
         return self.file_name or str(self.uuid)
+
+
