@@ -30,7 +30,7 @@ class CEMSRActivation(models.Model):
     event_time = models.DateTimeField(null=True, blank=True)
     registration_time = models.DateTimeField(null=True, blank=True)
     publication_date = models.DateTimeField(null=True, blank=True)
-    last_update = models.DateTimeField(null=True, blank=True)
+   
 
     # Geometry values from the CEMS API are commonly supplied as WKT strings.
     centroid = models.PointField(srid=4326, null=True, blank=True)
@@ -38,7 +38,7 @@ class CEMSRActivation(models.Model):
     closed = models.BooleanField(default=False)
 
     infobulletins = models.JSONField(default=list, blank=True)
-    products_path = models.CharField(max_length=1000, null=True, blank=True)
+    products_path = models.CharField(max_length=1000, null=True, blank=True) #"The path to the zipfile containing all the last version of the products of the activation"
     
     class Meta:
         ordering = ["-activation_time", "code"]
@@ -56,12 +56,17 @@ class CEMSRAOI(models.Model):
         on_delete=models.CASCADE,
         related_name="aois",
     )
-
+   
     aoi_number = models.PositiveIntegerField()
     aoi_name = models.CharField(max_length=255)
+    
+    is_real_extent = models.BooleanField(default=True)
+    sqkm = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True)
 
-    blp_path = models.CharField(max_length=1000, null=True, blank=True)
+    blp_path = models.CharField(max_length=1000, null=True, blank=True) # The path of the Base Layers Package for the AOI: Exposed Infrastructure
     geom = models.MultiPolygonField(srid=4326, null=True, blank=True)
+    
     
     class Meta:
         ordering = ["activation__code", "aoi_number"]
@@ -81,16 +86,21 @@ class CEMSRProduct(models.Model):
          CEMSRAOI, 
           on_delete=models.CASCADE, 
           related_name="products")
+    
     product_type = models.CharField(max_length=100, null=True, blank=True)
+    product_acronym = models.CharField(max_length=100, null=True, blank=True)
   
 
     monitoring = models.BooleanField(default=False)
     monitoring_number = models.PositiveIntegerField(null=True, blank=True)
-    feasible = models.BooleanField(default=True)
+    feasible = models.BooleanField(default=True) # If the product was actually produced
 
     extent = models.MultiPolygonField(srid=4326, null=True, blank=True)
 
     expected_delivery = models.DateTimeField(null=True, blank=True)
+    
+    download_path = models.CharField(max_length=1000, null=True, blank=True)
+    #stats
     
     class Meta:
         ordering = ["aoi__activation__code", "aoi__aoi_number", "product_type"]
@@ -122,13 +132,13 @@ class CEMSRProductVersion(models.Model):
     product = models.ForeignKey(
         CEMSRProduct,
         on_delete=models.CASCADE, 
-        related_name="product_version"
+        related_name="versions"
     )
     uuid = models.UUIDField(unique=True,null=True)
     status_code = models.CharField()
     reason = models.TextField()
     number = models.PositiveIntegerField()
-    delivery_time = models.DateTimeField()
+    delivery_time = models.DateTimeField(null=True)
     
     class Meta:
         ordering = ["product", "number"]
@@ -147,8 +157,9 @@ class CEMSRProductImage(models.Model):
     uuid = models.UUIDField(unique=True)
     is_new = models.BooleanField(default=False)
     
-    sensor_type = models.CharField(max_length=100)
+    
     resolution_class = models.CharField(max_length=100)
+    sensor_type = models.CharField(max_length=100)
     sensor_name = models.CharField(max_length=255, null=True, blank=True)
     
     acquisition_time = models.DateTimeField(null=True, blank=True)
