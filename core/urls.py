@@ -19,5 +19,5 @@ from django.urls import path ,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("proximity_alerts/", include("proximity_alerts.urls")),
+    path("alerts/", include("proximity_alerts.urls")),
 ]

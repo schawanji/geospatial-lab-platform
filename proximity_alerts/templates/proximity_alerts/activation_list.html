@@ -1,109 +1,371 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>CEMS Rapid Mapping Activations</title>
+    <meta charset="UTF-8">
+    <title>Activations | CEMS Rapid Mapping</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
+        :root {
+            --navy: #0f2742;
+            --blue: #2563eb;
+            --light-blue: #eff6ff;
+            --green: #16a34a;
+            --green-bg: #dcfce7;
+            --red: #dc2626;
+            --red-bg: #fee2e2;
+            --border: #e5e7eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f7f7f7;
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        a {
+            color: var(--blue);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: #1d4ed8;
+        }
+
+        .topbar {
+            min-height: 72px;
+            background: linear-gradient(90deg, #081829, #12365a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 32px;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            background: #f59e0b;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+        }
+
+        .brand-text small {
+            color: #bfdbfe;
+            display: block;
+            font-weight: 400;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            font-size: 14px;
+        }
+
+        .nav-links a {
+            color: #dbeafe;
+            padding-bottom: 4px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: white;
+        }
+
+        .nav-links a.active {
+            border-bottom-color: #60a5fa;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 10px;
+            width: 230px;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        .search-box:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #60a5fa;
+        }
+
+        .page {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 32px 32px 60px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
 
         h1 {
-            margin-bottom: 20px;
+            font-size: 28px;
+            margin: 0;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-        }
-
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: left;
-            vertical-align: top;
+            font-size: 14px;
         }
 
         th {
-            background: #222;
-            color: white;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            text-align: left;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: #f9fafb;
+            font-weight: 600;
         }
 
-        tr:nth-child(even) {
-            background: #f2f2f2;
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            color: #374151;
         }
 
-        a {
-            color: #0066cc;
-            text-decoration: none;
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .code-link {
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 14px;
         }
 
         .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            background: #eee;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .badge.green { background: var(--green-bg); color: var(--green); }
+        .badge.red { background: var(--red-bg); color: var(--red); }
+        .badge.blue { background: var(--light-blue); color: var(--blue); }
+
+        .button {
+            border: 1px solid var(--border);
+            background: white;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #374151;
+            transition: all 0.15s;
+        }
+
+        .button:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .button.primary {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: white;
+        }
+
+        .button.primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        .empty-state {
+            padding: 60px 40px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+            }
+            .nav-links {
+                width: 100%;
+                justify-content: space-between;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+            .search-box {
+                width: 100%;
+            }
+            .page {
+                padding: 24px 16px;
+            }
         }
     </style>
 </head>
+
 <body>
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-icon">⛰️</div>
+            <div class="brand-text">
+                <div>Proximity Alerts</div>
+                <small>CEMS Rapid Mapping</small>
+            </div>
+        </div>
 
-<h1>CEMS Rapid Mapping Activations</h1>
+        <nav class="nav-links">
+            <a href="#">Dashboard</a>
+            <a href="#" class="active">Activations</a>
+            <a href="#">AOIs</a>
+            <a href="#">Products</a>
+            <a href="#">Map</a>
+        </nav>
 
-<table>
-    <thead>
-        <tr>
-            <th>Code</th>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Sub-category</th>
-            <th>Country</th>
-            <th>Activation Time</th>
-            <th>Closed</th>
-        </tr>
-    </thead>
+        <input class="search-box" type="search" placeholder="Search activation...">
+    </header>
 
-    <tbody>
-        {% for activation in activations %}
-            <tr>
-                <td>
-                    <a href="{% url 'proximity_alerts:activation_detail' activation.code %}">
-                        {{ activation.code }}
-                    </a>
-                </td>
-                <td>{{ activation.name }}</td>
-                <td>{{ activation.category }}</td>
-                <td>{{ activation.sub_category }}</td>
-                <td>
-                    {% if activation.countries %}
-                        {{ activation.countries }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if activation.activation_time %}
-                        {{ activation.activation_time }}
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if activation.closed %}
-                        <span class="badge">Closed</span>
-                    {% else %}
-                        <span class="badge">Open</span>
-                    {% endif %}
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="7">No activations found.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <main class="page">
+        <div class="page-header">
+            <h1>CEMS Rapid Mapping Activations</h1>
+        </div>
 
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Sub-category</th>
+                            <th>Country</th>
+                            <th>Activation Time</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for activation in activations %}
+                        <tr>
+                            <td>
+                                <a class="code-link" href="{% url 'proximity_alerts:activation_detail' activation.code %}">
+                                    {{ activation.code }}
+                                </a>
+                            </td>
+                            <td><strong>{{ activation.name }}</strong></td>
+                            <td><span class="badge blue">{{ activation.category|default:"-" }}</span></td>
+                            <td>{{ activation.sub_category|default:"-" }}</td>
+                            <td>
+                                {% if activation.countries %}
+                                    {% for country in activation.countries %}
+                                        {% if country.name %}{{ country.name }}{% else %}{{ country }}{% endif %}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if activation.activation_time %}
+                                    {{ activation.activation_time|date:"Y-m-d H:i" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if activation.closed %}
+                                <span class="badge red">Closed</span>
+                                {% else %}
+                                <span class="badge green">Active</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if activation.products_path %}
+                                <a class="button primary" href="{{ activation.products_path }}" target="_blank" rel="noopener">
+                                    Download Latest
+                                </a>
+                                {% else %}
+                                <span class="badge" style="text-transform: none; font-weight: normal; background: none; border: 1px dashed var(--border);">No Product</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                No activations found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 </body>
+
 </html>

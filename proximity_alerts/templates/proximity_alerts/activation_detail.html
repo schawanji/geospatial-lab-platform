@@ -1,79 +1,739 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>{{ activation.code }}</title>
+    <meta charset="UTF-8">
+    <title>{{ activation.code }} | CEMS Activation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
-            background: #f7f7f7;
+        :root {
+            --navy: #0f2742;
+            --blue: #2563eb;
+            --light-blue: #eff6ff;
+            --green: #16a34a;
+            --green-bg: #dcfce7;
+            --red: #dc2626;
+            --red-bg: #fee2e2;
+            --yellow: #ca8a04;
+            --yellow-bg: #fef9c3;
+            --border: #e5e7eb;
+            --text: #111827;
+            --muted: #6b7280;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
         }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        a {
+            color: var(--blue);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: #1d4ed8;
+        }
+
+        .topbar {
+            min-height: 72px;
+            background: linear-gradient(90deg, #081829, #12365a);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 32px;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            background: #f59e0b;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+        }
+
+        .brand-text small {
+            color: #bfdbfe;
+            display: block;
+            font-weight: 400;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            font-size: 14px;
+        }
+
+        .nav-links a {
+            color: #dbeafe;
+            padding-bottom: 4px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: white;
+        }
+
+        .nav-links a.active {
+            border-bottom-color: #60a5fa;
+        }
+
+        .search-box {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 10px;
+            width: 230px;
+            outline: none;
+            transition: background 0.2s;
+        }
+
+        .search-box:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #60a5fa;
+        }
+
+        .page {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 28px 32px 60px;
+        }
+
+        .breadcrumb {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 28px;
+            align-items: stretch;
+            margin-bottom: 32px;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            font-size: 34px;
+            margin: 0;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .badge-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .badge.green { background: var(--green-bg); color: var(--green); }
+        .badge.red { background: var(--red-bg); color: var(--red); }
+        .badge.blue { background: var(--light-blue); color: var(--blue); }
+        .badge.yellow { background: var(--yellow-bg); color: var(--yellow); }
 
         .card {
-            background: white;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .info-card {
+            padding: 24px;
+        }
+
+        .info-card h3 {
+            margin: 0 0 20px 0;
+            font-size: 18px;
+            color: #0f172a;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px 28px;
+        }
+
+        .info-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .info-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--light-blue);
+            color: var(--blue);
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 2px;
+            font-weight: 600;
+        }
+
+        .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            word-break: break-word;
+        }
+
+        .stats-card {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            overflow: hidden;
+        }
+
+        .stat {
             padding: 20px;
-            border: 1px solid #ddd;
-            max-width: 900px;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        dt {
-            font-weight: bold;
-            margin-top: 12px;
+        .stat:last-child {
+            border-right: none;
         }
 
-        dd {
-            margin-left: 0;
-            margin-bottom: 8px;
+        .stat-number {
+            font-size: 26px;
+            font-weight: 800;
+            margin-top: 4px;
+            color: #0f172a;
         }
 
-        pre {
-            background: #eee;
-            padding: 12px;
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .map-card {
+            overflow: hidden;
+            height: 100%;
+            min-height: 400px;
+        }
+
+        #activation-map {
+            height: 100%;
+            width: 100%;
+            min-height: 400px;
+            z-index: 1;
+        }
+
+        .section {
+            margin-top: 32px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .button {
+            border: 1px solid var(--border);
+            background: white;
+            padding: 9px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #374151;
+            transition: all 0.15s;
+        }
+
+        .button:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .button.primary {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: white;
+        }
+
+        .button.primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        .table-wrap {
             overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            color: var(--muted);
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.05em;
+            text-align: left;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            background: #f9fafb;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+            color: #374151;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .mini-map-thumb {
+            width: 84px;
+            height: 58px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #bfdbfe, #d1fae5);
+            border: 1px solid var(--border);
+        }
+
+        .empty-state {
+            padding: 60px 40px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        @media (max-width: 1024px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+            .stats-card {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .stat:nth-child(3) {
+                border-right: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+            }
+            .nav-links {
+                width: 100%;
+                justify-content: space-between;
+                overflow-x: auto;
+                padding-bottom: 4px;
+            }
+            .search-box {
+                width: 100%;
+            }
+            .stats-card {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stat {
+                border-right: 1px solid var(--border);
+            }
+            .stat:nth-child(even) {
+                border-right: none;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                padding: 20px 16px 44px;
+            }
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-card {
+                grid-template-columns: 1fr;
+            }
+            .stat {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            .stat:last-child {
+                border-bottom: none;
+            }
         }
     </style>
 </head>
+
 <body>
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-icon">⛰️</div>
+            <div class="brand-text">
+                <div>Proximity Alerts</div>
+                <small>CEMS Rapid Mapping</small>
+            </div>
+        </div>
 
-<p>
-    <a href="{% url 'proximity_alerts:activation_list' %}">Back to activations</a>
-</p>
+        <nav class="nav-links">
+            <a href="#">Dashboard</a>
+            <a href="#" class="active">Activations</a>
+            <a href="#">AOIs</a>
+            <a href="#">Products</a>
+            <a href="#">Map</a>
+        </nav>
 
-<div class="card">
-    <h1>{{ activation.code }} - {{ activation.name }}</h1>
+        <input class="search-box" type="search" placeholder="Search activation...">
+    </header>
 
-    <dl>
-        <dt>Category</dt>
-        <dd>{{ activation.category }}</dd>
+    <main class="page">
+        <a class="breadcrumb" href="{% url 'proximity_alerts:activation_list' %}">
+            ← Back to activations
+        </a>
 
-        <dt>Sub-category</dt>
-        <dd>{{ activation.sub_category }}</dd>
+        <section class="hero">
+            <div class="hero-left">
+                <div>
+                    <div class="header-row" style="margin-bottom: 12px;">
+                        <h1>{{ activation.code }}</h1>
+                        {% if activation.closed %}
+                        <span class="badge red">Closed</span>
+                        {% else %}
+                        <span class="badge green">Active</span>
+                        {% endif %}
+                    </div>
 
-        <dt>Reason</dt>
-        <dd>{{ activation.reason }}</dd>
+                    <p class="subtitle">{{ activation.name|default:"CEMS Rapid Mapping Activation" }}</p>
+                    
+                    <div class="badge-container" style="margin-top: 14px;">
+                        <span class="badge blue">{{ activation.category|default:"Rapid Mapping" }}</span>
+                        {% if activation.sub_category %}
+                        <span class="badge blue">{{ activation.sub_category }}</span>
+                        {% endif %}
+                    </div>
+                </div>
 
-        <dt>Countries</dt>
-        <dd>{{ activation.countries }}</dd>
+                <div class="card info-card">
+                    <h3>Activation Summary</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-icon">🕒</div>
+                            <div>
+                                <div class="label">Event / Activation Time</div>
+                                <div class="value">
+                                    {{ activation.event_time|date:"Y-m-d H:i" }}<br>
+                                    <span style="font-weight: 400; font-size: 12px; color: var(--muted);">
+                                        Act: {{ activation.activation_time|date:"Y-m-d H:i" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
 
-        <dt>Continent</dt>
-        <dd>{{ activation.continent }}</dd>
+                        <div class="info-item">
+                            <div class="info-icon">🔐</div>
+                            <div>
+                                <div class="label">Sensitive</div>
+                                <div class="value">{% if activation.sensitive %}Yes{% else %}No{% endif %}</div>
+                            </div>
+                        </div>
 
-        <dt>Activation time</dt>
-        <dd>{{ activation.activation_time }}</dd>
+                        <div class="info-item">
+                            <div class="info-icon">🌍</div>
+                            <div>
+                                <div class="label">Countries</div>
+                                <div class="value">
+                                    {% for country in activation.countries %}
+                                        {% if country.name %}{{ country.name }}{% else %}{{ country }}{% endif %}{% if not forloop.last %}, {% endif %}
+                                    {% empty %}-{% endfor %}
+                                </div>
+                            </div>
+                        </div>
 
-        <dt>Event time</dt>
-        <dd>{{ activation.event_time }}</dd>
+                        <div class="info-item">
+                            <div class="info-icon">🧭</div>
+                            <div>
+                                <div class="label">Continent / Source</div>
+                                <div class="value">
+                                    {{ activation.continent|default:"-" }} <br>
+                                    <span style="font-weight: 400; font-size: 12px; color: var(--muted);">
+                                        {{ activation.source_api|default:"Rapid Mapping" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
 
-        <dt>Closed</dt>
-        <dd>{{ activation.closed }}</dd>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <div class="info-icon">⚠️</div>
+                            <div>
+                                <div class="label">Reason</div>
+                                <div class="value">{{ activation.reason|default:"-" }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <dt>Centroid</dt>
-        <dd>{{ activation.centroid }}</dd>
+                <div class="card stats-card">
+                    <div class="stat">
+                        <div class="stat-label">AOIs</div>
+                        <div class="stat-number">{{ aois|length }}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Products</div>
+                        <div class="stat-number">{{ products|length }}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Layers</div>
+                        <div class="stat-number">{{ layers|length }}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Images</div>
+                        <div class="stat-number">{{ images|length }}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">Package</div>
+                        <div class="stat-number" style="font-size: 14px;">
+                            {% if activation.products_path %}
+                            <a class="button primary" href="{{ activation.products_path }}" target="_blank" rel="noopener" style="padding: 6px 12px; width: 100%;">
+                                Download
+                            </a>
+                            {% else %}
+                            <span class="badge" style="width: 100%; text-align: center;">None</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <dt>Extent</dt>
-        <dd>{{ activation.extent }}</dd>
-    </dl>
-</div>
+            <div class="card map-card">
+                <div id="activation-map"></div>
+            </div>
+        </section>
 
+        <section class="section card">
+            <div class="section-header">
+                <div class="section-title">📍 Areas of Interest</div>
+                <button class="button">View all AOIs</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Preview</th>
+                            <th>AOI Number</th>
+                            <th>Name</th>
+                            <th>BaseLayer Package</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aoi in aois %}
+                        <tr>
+                            <td>
+                                <div class="mini-map-thumb"></div>
+                            </td>
+                            <td style="font-family: monospace; font-weight: 600;">
+                                {{ aoi.aoi_number|stringformat:"02d" }}
+                            </td>
+                            <td>
+                                <strong>{{ aoi.aoi_name|default:"Unnamed AOI" }}</strong>
+                            </td>
+                            <td>
+                                {% if aoi.blp_path %}
+                                <a class="button" href="{{ aoi.blp_path }}" target="_blank" rel="noopener">
+                                    Download Package
+                                </a>
+                                {% else %}
+                                <span class="badge" style="text-transform: none; font-weight: normal;">No package Available</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a class="button primary" href="{% url 'proximity_alerts:aoi_detail' activation.code aoi.aoi_number %}">
+                                    View Details
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                No AOIs imported for this activation.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    {{ activation_extent_geojson|json_script:"activation-extent-data" }}
+    {{ aois_geojson|json_script:"aois-data" }}
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        const map = L.map("activation-map", {
+            scrollWheelZoom: true
+        }).setView([44.5, 11.5], 7);
+
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+        }).addTo(map);
+
+        // Fix Leaflet viewport bugs if container dimensions shift inside grid distributions
+        setTimeout(() => { map.invalidateSize(); }, 200);
+
+        const activationExtentEl = document.getElementById("activation-extent-data");
+        const aoisEl = document.getElementById("aois-data");
+
+        let bounds = null;
+
+        function addGeoJsonLayer(data, options) {
+            if (!data) return;
+            const layer = L.geoJSON(data, options).addTo(map);
+            try {
+                const layerBounds = layer.getBounds();
+                if (layerBounds.isValid()) {
+                    bounds = bounds ? bounds.extend(layerBounds) : layerBounds;
+                }
+            } catch (error) {
+                console.warn("Could not calculate layer bounds", error);
+            }
+        }
+
+        if (activationExtentEl && activationExtentEl.textContent.trim()) {
+            try {
+                const activationExtent = JSON.parse(activationExtentEl.textContent);
+                addGeoJsonLayer(activationExtent, {
+                    style: {
+                        color: "#2563eb",
+                        weight: 2,
+                        fillColor: "#93c5fd",
+                        fillOpacity: 0.22
+                    }
+                });
+            } catch(e) { console.error("Error parsing activation extent GeoJSON", e); }
+        }
+
+        if (aoisEl && aoisEl.textContent.trim()) {
+            try {
+                const aois = JSON.parse(aoisEl.textContent);
+                addGeoJsonLayer(aois, {
+                    style: {
+                        color: "#16a34a",
+                        weight: 2,
+                        fillColor: "#86efac",
+                        fillOpacity: 0.28
+                    },
+                    onEachFeature: function (feature, layer) {
+                        const props = feature.properties || {};
+                        layer.bindPopup(`
+                            <div style="font-family: sans-serif; font-size:13px; line-height:1.4;">
+                                <strong style="font-size:14px; display:block; margin-bottom:4px;">${props.aoi_name || "AOI"}</strong>
+                                <b>AOI number:</b> ${props.aoi_number || "-"}<br>
+                                <b>Area:</b> ${props.sqkm || "-"} km²
+                            </div>
+                        `);
+                    }
+                });
+            } catch(e) { console.error("Error parsing AOI GeoJSON", e); }
+        }
+
+        if (bounds && bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [30, 30] });
+        }
+    </script>
 </body>
 </html>
