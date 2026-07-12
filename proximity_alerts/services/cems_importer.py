@@ -24,6 +24,7 @@ from proximity_alerts.models import (
     CEMSRProductImage,
     CEMSRProductLayer,
     CEMSRProductVersion,
+    CEMSRProductStat
 )
 
 logger = logging.getLogger(__name__)
@@ -124,15 +125,18 @@ class CEMSActivationImporter:
                     get_any(payload, "lastUpdate", "last_update")
                 ),
                 "centroid": parse_point_wkt(get_any(payload, "centroid")),
-                "extent": parse_polygonal_wkt(get_any(payload, "extent")),
+                "geom": parse_polygonal_wkt(get_any(payload, "extent")),
                 "infobulletins": get_any(payload, "infobulletins") or [],
                 "closed": to_bool(get_any(payload, "closed"), default=False),
                 "sensitive": to_bool(get_any(payload, "sensitive"), default=False),
                 "products_path": get_any(payload, "productsPath", "products_path"),
+                "related_events": get_any(payload, "relatedEvents", "related_events"),
+                "report_link": get_any(payload, "reportLink", "report_link"),
                 "raw_payload": payload,
             },
         )
 
+    
         # 2. Save the parent Activation and capture the response as a single variable. If an activation with this code already exists, update it.
         # If it does not exist, create it.
 
@@ -271,27 +275,10 @@ class CEMSActivationImporter:
                     get_any(payload, "expectedDelivery", "expected_delivery")
                 ),
                 "download_path": get_any(payload, "downloadPath", "download_path"),
-                "maps_download": get_any(
-                    payload,
-                    "mapsDownload",
-                    "maps_download",
-                    "downloadPath",
-                    "download_path",
-                ),
-                
-                "analysis_scale": get_any(payload, "analysisScale", "analysis_scale"),
-                "brief_description": get_any(
-                    payload, "briefDescription", "brief_description"
-                ),
-                "determination_method": get_any(
-                    payload, "determinationMethod", "determination_method"
-                ),
-                "drm_phase": get_any(payload, "drmPhase", "drm_phase")
-                or getattr(activation, "act_drm_phase", None)
-                or "Rapid Mapping",
                 "status_code": get_any(version, "statusCode", "status_code"),
-                "product_extent": extent,
+                "extent": extent,
                 "stats": get_any(payload, "stats") or {},
+                "stats_raw": get_any(payload, "stats") or {},
                 
             },
         )
@@ -308,8 +295,13 @@ class CEMSActivationImporter:
                 monitoring_number=monitoring_number,
                 defaults=defaults,
             )
-
-            return product
+            
+      
+        self.import_product_stats(
+        product=product,
+        stats_payload=get_any(payload, "stats") or {},
+                 )
+        return product
 
     def import_product_version(
         self, *, product: CEMSRProduct, payload: dict[str, Any]
@@ -399,13 +391,16 @@ class CEMSActivationImporter:
             )
             return False
 
-        layer_type = get_any(payload, "type", "format", "layerType", "layer_type") or ""
+       
 
         defaults = filter_model_defaults(
             CEMSRProductLayer,
             {
-                "layer_type": layer_type,
-                "raw_payload": payload,
+                "layer_type": get_any(payload, "type", "format", "layerType", "layer_type") or "",
+                'layer_json_path' : get_any(payload, "json") or "",
+                'layer_format' : get_any(payload,"format") or "",
+                'layer_sld_path': get_any(payload, "sld") or "",
+                
             },
         )
 
@@ -415,6 +410,40 @@ class CEMSActivationImporter:
             defaults=defaults,
         )
         return True
+    
+    def import_product_stats(self, *, product: CEMSRProduct, stats_payload: dict[str, Any]) -> int:
+        if not stats_payload:
+            return 0
+
+        imported_count = 0
+
+        for theme, theme_values in stats_payload.items():
+            if not isinstance(theme_values, dict):
+                continue
+
+            for label, metric_values in theme_values.items():
+                if not isinstance(metric_values, dict):
+                    continue
+
+                unit = metric_values.get("unit")
+                total = metric_values.get("total")
+                affected = metric_values.get("affected")
+
+                CEMSRProductStat.objects.update_or_create(
+                    product=product,
+                    theme=str(theme),
+                    label=str(label),
+                    defaults={
+                        "unit": str(unit) if unit not in [None, ""] else "",
+                        "total": str(total) if total is not None else None,
+                        "affected": str(affected) if affected is not None else None,
+                        "raw_payload": metric_values,
+                    },
+                )
+
+                imported_count += 1
+
+        return imported_count
 
 
 def normalize_base_url(base_url: str) -> str:

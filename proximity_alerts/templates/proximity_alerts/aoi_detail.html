@@ -175,6 +175,7 @@
             margin-bottom: 4px;
             font-size: 13px;
         }
+
         .cell-stack div:last-child {
             margin-bottom: 0;
         }
@@ -285,7 +286,6 @@
                         <tr>
                             <th>Product Type</th>
                             <th>Monitoring</th>
-                            <th>Feasible</th>
                             <th>Expected Delivery</th>
                             <th>Download</th>
                             <th>Layers</th>
@@ -309,13 +309,7 @@
                                 <span class="muted">No</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if product.feasible %}
-                                <span class="badge green">Yes</span>
-                                {% else %}
-                                <span class="badge red">No</span>
-                                {% endif %}
-                            </td>
+                            
                             <td>
                                 {{ product.expected_delivery|date:"Y-m-d H:i"|default:"-" }}
                             </td>
@@ -339,11 +333,8 @@
                                 {% endfor %}
                             </td>
                             <td class="cell-stack">
-                                {% for version in product.versions.all %}
-                                <div>{{ version.status_code|default:"Unknown" }}</div>
-                                {% empty %}
-                                <span class="muted">-</span>
-                                {% endfor %}
+                               
+                              
                             </td>
                             <td class="cell-stack">
                                 {% for version in product.versions.all %}
@@ -362,9 +353,14 @@
                             <td class="cell-stack">
                                 {% for image in product.images.all %}
                                 <div>
-                                    <strong>{{ image.sensor_type|default:"-" }}</strong> {{ image.sensor_name|default:"-" }}
+                                    <strong>
+                                        {{ image.sensor_type|default:"-" }}
+                                    </strong> 
+                                    {{image.sensor_name|default:"-" }}
                                     <br>
-                                    <small class="muted">{{ image.acquisition_time|date:"Y-m-d H:i"|default:"-" }}</small>
+                                    <small class="muted">
+                                        {{ image.acquisition_time|date:"Y-m-d H:i"|default:"-"}}
+                                    </small>
                                 </div>
                                 {% empty %}
                                 <span class="muted">-</span>
@@ -384,10 +380,7 @@
         </section>
     </main>
 
-    <script id="aoi-geojson" type="application/json">
-        {{ aoi.geojson|safe|default:"{}" }}
-    </script>
-
+   
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         const map = L.map("aoi-map").setView([0, 0], 2);
@@ -433,4 +426,5 @@
         }
     </script>
 </body>
+
 </html>

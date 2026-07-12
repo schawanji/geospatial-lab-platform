@@ -32,7 +32,11 @@ def activation_detail(request, code):
     products = CEMSRProduct.objects.filter(aoi__activation__code=code).select_related(
         "aoi"
     )
-
+    non_n_versions_count = CEMSRProductVersion.objects.filter(
+        product__in=products
+    ).exclude(
+        status_code="N"
+    ).count()
     versions = (
         CEMSRProductVersion.objects
         .filter(product__in=products)
@@ -51,6 +55,7 @@ def activation_detail(request, code):
         "activation": activation,
         "aois": aois,
         "products": products,
+        "non_n_versions_count": non_n_versions_count,
         'layers':layers,
         "versions": versions,
         'images': images

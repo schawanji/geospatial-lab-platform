@@ -97,7 +97,8 @@
             border-bottom: 2px solid transparent;
         }
 
-        .nav-links a:hover, .nav-links a.active {
+        .nav-links a:hover,
+        .nav-links a.active {
             color: white;
         }
 
@@ -191,10 +192,25 @@
             color: var(--text);
         }
 
-        .badge.green { background: var(--green-bg); color: var(--green); }
-        .badge.red { background: var(--red-bg); color: var(--red); }
-        .badge.blue { background: var(--light-blue); color: var(--blue); }
-        .badge.yellow { background: var(--yellow-bg); color: var(--yellow); }
+        .badge.green {
+            background: var(--green-bg);
+            color: var(--green);
+        }
+
+        .badge.red {
+            background: var(--red-bg);
+            color: var(--red);
+        }
+
+        .badge.blue {
+            background: var(--light-blue);
+            color: var(--blue);
+        }
+
+        .badge.yellow {
+            background: var(--yellow-bg);
+            color: var(--yellow);
+        }
 
         .card {
             background: var(--card);
@@ -401,9 +417,11 @@
             .hero {
                 grid-template-columns: 1fr;
             }
+
             .stats-card {
                 grid-template-columns: repeat(3, 1fr);
             }
+
             .stat:nth-child(3) {
                 border-right: none;
             }
@@ -415,21 +433,26 @@
                 align-items: flex-start;
                 padding: 20px;
             }
+
             .nav-links {
                 width: 100%;
                 justify-content: space-between;
                 overflow-x: auto;
                 padding-bottom: 4px;
             }
+
             .search-box {
                 width: 100%;
             }
+
             .stats-card {
                 grid-template-columns: repeat(2, 1fr);
             }
+
             .stat {
                 border-right: 1px solid var(--border);
             }
+
             .stat:nth-child(even) {
                 border-right: none;
             }
@@ -439,16 +462,20 @@
             .page {
                 padding: 20px 16px 44px;
             }
+
             .info-grid {
                 grid-template-columns: 1fr;
             }
+
             .stats-card {
                 grid-template-columns: 1fr;
             }
+
             .stat {
                 border-right: none;
                 border-bottom: 1px solid var(--border);
             }
+
             .stat:last-child {
                 border-bottom: none;
             }
@@ -465,14 +492,6 @@
                 <small>CEMS Rapid Mapping</small>
             </div>
         </div>
-
-        <nav class="nav-links">
-            <a href="#">Dashboard</a>
-            <a href="#" class="active">Activations</a>
-            <a href="#">AOIs</a>
-            <a href="#">Products</a>
-            <a href="#">Map</a>
-        </nav>
 
         <input class="search-box" type="search" placeholder="Search activation...">
     </header>
@@ -495,7 +514,7 @@
                     </div>
 
                     <p class="subtitle">{{ activation.name|default:"CEMS Rapid Mapping Activation" }}</p>
-                    
+
                     <div class="badge-container" style="margin-top: 14px;">
                         <span class="badge blue">{{ activation.category|default:"Rapid Mapping" }}</span>
                         {% if activation.sub_category %}
@@ -532,10 +551,17 @@
                             <div class="info-icon">🌍</div>
                             <div>
                                 <div class="label">Countries</div>
+
                                 <div class="value">
                                     {% for country in activation.countries %}
-                                        {% if country.name %}{{ country.name }}{% else %}{{ country }}{% endif %}{% if not forloop.last %}, {% endif %}
-                                    {% empty %}-{% endfor %}
+                                    {% if country.name %}
+                                    {{ country.name }}
+                                    {% else %}
+                                    {{ country }}
+                                    {% endif %}{% if not forloop.last %}, {% endif %}
+                                    {% empty %}
+                                    -
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -559,7 +585,21 @@
                                 <div class="label">Reason</div>
                                 <div class="value">{{ activation.reason|default:"-" }}</div>
                             </div>
+
                         </div>
+
+
+                        <div>
+                            {% if activation.report_link %}
+                            <a class="button primary" href="{{ activation.report_link }}" target="_blank" rel="noopener"
+                                style="padding: 6px 12px; width: 100%;">
+                                report_link
+                            </a>
+                            {% else %}
+                            <span class="badge" style="width: 100%; text-align: center;"></span>
+                            {% endif %}
+                        </div>
+
                     </div>
                 </div>
 
@@ -570,7 +610,10 @@
                     </div>
                     <div class="stat">
                         <div class="stat-label">Products</div>
-                        <div class="stat-number">{{ products|length }}</div>
+                        <div class="stat-number">
+                            {{ non_n_versions_count }}
+                        </div>
+
                     </div>
                     <div class="stat">
                         <div class="stat-label">Layers</div>
@@ -584,7 +627,8 @@
                         <div class="stat-label">Package</div>
                         <div class="stat-number" style="font-size: 14px;">
                             {% if activation.products_path %}
-                            <a class="button primary" href="{{ activation.products_path }}" target="_blank" rel="noopener" style="padding: 6px 12px; width: 100%;">
+                            <a class="button primary" href="{{ activation.products_path }}" target="_blank"
+                                rel="noopener" style="padding: 6px 12px; width: 100%;">
                                 Download
                             </a>
                             {% else %}
@@ -603,7 +647,7 @@
         <section class="section card">
             <div class="section-header">
                 <div class="section-title">📍 Areas of Interest</div>
-                <button class="button">View all AOIs</button>
+               
             </div>
 
             <div class="table-wrap">
@@ -614,6 +658,8 @@
                             <th>AOI Number</th>
                             <th>Name</th>
                             <th>BaseLayer Package</th>
+                            <th>Products</th>
+                            <th>Layers</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -635,11 +681,26 @@
                                     Download Package
                                 </a>
                                 {% else %}
-                                <span class="badge" style="text-transform: none; font-weight: normal;">No package Available</span>
+                                <span class="badge" style="text-transform: none; font-weight: normal;">No package
+                                    Available</span>
                                 {% endif %}
                             </td>
                             <td>
-                                <a class="button primary" href="{% url 'proximity_alerts:aoi_detail' activation.code aoi.aoi_number %}">
+                                {{ aoi.products.all|length}}
+
+                            </td>
+                            <td>
+                                {% for product in aoi.products.all %}
+                                <div>
+                                    {{ product.product_type }} : {{ product.layers.count }}
+                                </div>
+                                {% empty %}
+                                -
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <a class="button primary"
+                                    href="{% url 'proximity_alerts:aoi_detail' activation.code aoi.aoi_number %}">
                                     View Details
                                 </a>
                             </td>
@@ -657,8 +718,6 @@
         </section>
     </main>
 
-    {{ activation_extent_geojson|json_script:"activation-extent-data" }}
-    {{ aois_geojson|json_script:"aois-data" }}
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -704,7 +763,7 @@
                         fillOpacity: 0.22
                     }
                 });
-            } catch(e) { console.error("Error parsing activation extent GeoJSON", e); }
+            } catch (e) { console.error("Error parsing activation extent GeoJSON", e); }
         }
 
         if (aoisEl && aoisEl.textContent.trim()) {
@@ -728,7 +787,7 @@
                         `);
                     }
                 });
-            } catch(e) { console.error("Error parsing AOI GeoJSON", e); }
+            } catch (e) { console.error("Error parsing AOI GeoJSON", e); }
         }
 
         if (bounds && bounds.isValid()) {
@@ -736,4 +795,5 @@
         }
     </script>
 </body>
+
 </html>

@@ -16,7 +16,6 @@ class CEMSRActivation(models.Model):
                     ├── CEMSRProductLayer
                     └── CEMSProductImage
     """
-
     code = models.CharField(max_length=20, unique=True, db_index=True)
     name = models.CharField(max_length=500)
     reason = models.TextField(null=True, blank=True)
@@ -34,12 +33,14 @@ class CEMSRActivation(models.Model):
 
     # Geometry values from the CEMS API are commonly supplied as WKT strings.
     centroid = models.PointField(srid=4326, null=True, blank=True)
-    extent = models.MultiPolygonField(srid=4326, null=True, blank=True)
+    geom = models.MultiPolygonField(srid=4326, null=True, blank=True)
     closed = models.BooleanField(default=False)
 
     infobulletins = models.JSONField(default=list, blank=True)
     products_path = models.CharField(max_length=1000, null=True, blank=True) #"The path to the zipfile containing all the last version of the products of the activation"
     related_events = models.CharField(max_length=1000, null=True, blank=True)
+    report_link = models.CharField(max_length=1000, null=True, blank=True) 
+    
     class Meta:
         ordering = ["-activation_time", "code"]
         verbose_name = "CEMS activation"
@@ -100,7 +101,7 @@ class CEMSRProduct(models.Model):
     expected_delivery = models.DateTimeField(null=True, blank=True)
     
     download_path = models.CharField(max_length=1000, null=True, blank=True)
-    #stats
+    stats_raw = models.JSONField(default=dict, blank=True)
     
     class Meta:
         ordering = ["aoi__activation__code", "aoi__aoi_number", "product_type"]
@@ -133,16 +134,29 @@ class CEMSRProductLayer(models.Model):
         return self.name or f"Layer {self.pk}"
    
 class CEMSRProductVersion(models.Model):
+    STATUS_CHOICES = [
+        
+       ( 'W',"Waiting for data"),
+       ( 'I','In production'),
+       ( "F","Production finished"),
+        ("N","Not produced")
+        
+        ]
     product = models.ForeignKey(
         CEMSRProduct,
         on_delete=models.CASCADE, 
         related_name="versions"
     )
     uuid = models.UUIDField(unique=True,null=True)
-    status_code = models.CharField(max_length=100, null=True, blank=True)
+    status_code = models.CharField( max_length=100, 
+                                    choices=STATUS_CHOICES,
+                                    null=True, 
+                                    blank=True 
+                                    )
     reason = models.TextField(null=True, blank=True)
     number = models.PositiveIntegerField(null=True, blank=True)
     delivery_time = models.DateTimeField(null=True, blank=True)
+    stats={}
     
     class Meta:
         ordering = ["product", "number"]
@@ -176,3 +190,31 @@ class CEMSRProductImage(models.Model):
         return self.file_name or str(self.uuid)
 
 
+class CEMSRProductStat(models.Model):
+    product = models.ForeignKey(
+        CEMSRProduct,
+        on_delete=models.CASCADE,
+        related_name="stats",
+    )
+
+    theme = models.CharField(max_length=255)
+    label = models.CharField(max_length=500)
+
+    unit = models.CharField(max_length=50, null=True, blank=True)
+
+    total = models.CharField(max_length=100, null=True, blank=True)
+    affected = models.CharField(max_length=100, null=True, blank=True)
+
+    raw_payload = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ["product", "theme", "label"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product", "theme", "label"],
+                name="unique_product_stat_theme_label",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.product} - {self.theme}: {self.label}"
