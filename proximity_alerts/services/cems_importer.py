@@ -595,3 +595,5 @@ def to_decimal(value: Any) -> Decimal | None:
 
 def model_has_field(model_cls, field_name: str) -> bool:
     return field_name in {field.name for field in model_cls._meta.get_fields()}
+
+

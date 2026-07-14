@@ -461,34 +461,52 @@ class GeoServerClient:
                 f"?recurse=true&quietOnNotFound=true"
             ),
         )
+        
+        from urllib.parse import quote
 
-    def list_layer_names(self, *, workspace: str) -> list[str]:
-        encoded_workspace = quote(workspace)
 
-        response = self.request(
+    def list_layer_names(
+        self,
+        workspace: str | None = None,
+    ) -> list[str]:
+        if workspace:
+            encoded_workspace = quote(
+                workspace,
+                safe="",
+            )
+
+            endpoint = (
+                f"/rest/workspaces/{encoded_workspace}/"
+                "layers.json"
+            )
+        else:
+            endpoint = "/rest/layers.json"
+
+        data = self.request(
             "GET",
-            f"/workspaces/{encoded_workspace}/layers.json",
+            endpoint,
         )
 
-        if response.status_code == 404:
+        if not isinstance(data, dict):
             return []
 
-        data = response.json()
-        layers = data.get("layers", {}).get("layer", [])
+        layers_container = data.get("layers") or {}
 
-        if isinstance(layers, dict):
-            layers = [layers]
+        if not isinstance(layers_container, dict):
+            return []
 
-        output = []
+        layer_items = layers_container.get("layer") or []
 
-        for layer in layers:
-            name = layer.get("name")
-            if name:
-                output.append(name)
+        if not isinstance(layer_items, list):
+            return []
 
-        return output
-
-
+        return [
+            str(item["name"])
+            for item in layer_items
+            if isinstance(item, dict) and item.get("name")
+        ]
+            
+    
 def is_safe_identifier(value: str) -> bool:
     return bool(re.match(r"^[a-zA-Z_][a-zA-Z0-9_]{0,62}$", value or ""))
 
