@@ -1,302 +1,712 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Activations | CEMS Rapid Mapping</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>CEMS Rapid Mapping Activations</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
 
     <style>
         :root {
-            --navy: #0f2742;
-            --blue: #2563eb;
-            --light-blue: #eff6ff;
-            --green: #16a34a;
-            --green-bg: #dcfce7;
-            --red: #dc2626;
-            --red-bg: #fee2e2;
-            --border: #e5e7eb;
-            --text: #111827;
-            --muted: #6b7280;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+            --primary: #155e75;
+            --primary-dark: #0c4a6e;
+            --primary-light: #ecfeff;
+            --secondary: #0f766e;
+
+            --background: #f8fafc;
+            --surface: #ffffff;
+
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+
+            --border: #e2e8f0;
+
+            --success: #15803d;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+
+            --danger: #b91c1c;
+            --danger-bg: #fef2f2;
+            --danger-border: #fecaca;
+
+            --shadow:
+                0 15px 35px rgba(15, 23, 42, 0.07);
         }
 
         * {
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             margin: 0;
-            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            line-height: 1.5;
+            background-color: var(--background);
+            color: var(--text-main);
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
         }
 
         a {
-            color: var(--blue);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        a:hover {
-            color: #1d4ed8;
+            color: inherit;
         }
 
         .topbar {
-            min-height: 72px;
-            background: linear-gradient(90deg, #081829, #12365a);
-            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 32px;
-            gap: 20px;
+            gap: 2rem;
+
+            min-height: 72px;
+            padding: 0 2rem;
+
+            border-bottom: 1px solid var(--border);
+            background-color: rgba(255, 255, 255, 0.97);
+
+            backdrop-filter: blur(12px);
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            font-size: 18px;
+            gap: 0.8rem;
+
+            min-width: max-content;
+            color: var(--primary-dark);
+            text-decoration: none;
         }
 
         .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
             width: 42px;
             height: 42px;
-            border-radius: 999px;
-            background: #f59e0b;
-            display: grid;
-            place-items: center;
-            font-size: 22px;
+
+            border-radius: 0.8rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+
+            font-size: 1.25rem;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+
+            font-size: 1rem;
+            font-weight: 750;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
         }
 
         .brand-text small {
-            color: #bfdbfe;
-            display: block;
-            font-weight: 400;
+            margin-top: 0.2rem;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0;
         }
 
         .nav-links {
             display: flex;
-            gap: 28px;
-            font-size: 14px;
+            align-items: center;
+            gap: 0.35rem;
+
+            margin-left: auto;
         }
 
         .nav-links a {
-            color: #dbeafe;
-            padding-bottom: 4px;
-            border-bottom: 2px solid transparent;
+            position: relative;
+
+            padding: 0.75rem 0.9rem;
+
+            border-radius: 0.6rem;
+
+            color: #334155;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+
+            transition:
+                color 0.2s ease,
+                background-color 0.2s ease;
         }
 
-        .nav-links a:hover, .nav-links a.active {
-            color: white;
+        .nav-links a:hover {
+            background-color: var(--primary-light);
+            color: var(--primary);
         }
 
         .nav-links a.active {
-            border-bottom-color: #60a5fa;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-links a.active::after {
+            content: "";
+
+            position: absolute;
+            right: 0.9rem;
+            bottom: 0.35rem;
+            left: 0.9rem;
+
+            height: 2px;
+
+            border-radius: 999px;
+            background-color: var(--primary);
+        }
+
+        .search-wrapper {
+            position: relative;
+
+            width: min(250px, 22vw);
+            min-width: 180px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 0.9rem;
+
+            color: var(--text-muted);
+
+            transform: translateY(-50%);
+            pointer-events: none;
         }
 
         .search-box {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: white;
-            padding: 10px 14px;
-            border-radius: 10px;
-            width: 230px;
+            width: 100%;
+            height: 42px;
+            padding: 0 0.9rem 0 2.5rem;
+
+            border: 1px solid var(--border);
+            border-radius: 0.7rem;
+
             outline: none;
-            transition: background 0.2s;
+            background-color: #f8fafc;
+            color: var(--text-main);
+
+            font: inherit;
+            font-size: 0.9rem;
+
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background-color 0.2s ease;
+        }
+
+        .search-box::placeholder {
+            color: #94a3b8;
         }
 
         .search-box:focus {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #60a5fa;
+            border-color: #67e8f9;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
         }
 
         .page {
-            max-width: 1320px;
+            width: min(1500px, calc(100% - 3rem));
             margin: 0 auto;
-            padding: 32px 32px 60px;
+            padding: 3.5rem 0 5rem;
         }
 
         .page-header {
             display: flex;
+            align-items: flex-end;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
+            gap: 2rem;
+
+            margin-bottom: 1.75rem;
         }
 
-        h1 {
-            font-size: 28px;
+        .page-label {
+            margin-bottom: 0.55rem;
+
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 750;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .page-header h1 {
             margin: 0;
-            color: #0f172a;
-            letter-spacing: -0.02em;
+
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 750;
+            line-height: 1.08;
+            letter-spacing: -0.045em;
+        }
+
+        .page-description {
+            max-width: 700px;
+            margin: 0.9rem 0 0;
+
+            color: var(--text-muted);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .header-stat {
+            min-width: 190px;
+            padding: 1rem 1.15rem;
+
+            border: 1px solid var(--border);
+            border-radius: 0.9rem;
+
+            background-color: white;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+        }
+
+        .header-stat-label {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .header-stat-value {
+            margin-top: 0.25rem;
+
+            color: var(--primary-dark);
+            font-size: 1.65rem;
+            font-weight: 750;
+            letter-spacing: -0.04em;
         }
 
         .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: var(--shadow);
             overflow: hidden;
+
+            border: 1px solid var(--border);
+            border-radius: 1.1rem;
+
+            background-color: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+
+            padding: 1.1rem 1.3rem;
+
+            border-bottom: 1px solid var(--border);
+            background-color: white;
+        }
+
+        .card-title {
+            margin: 0;
+
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .card-subtitle {
+            margin-top: 0.25rem;
+
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        .result-count {
+            padding: 0.4rem 0.7rem;
+
+            border: 1px solid var(--border);
+            border-radius: 999px;
+
+            background-color: #f8fafc;
+            color: var(--text-muted);
+
+            font-size: 0.78rem;
+            font-weight: 650;
         }
 
         .table-wrap {
+            width: 100%;
             overflow-x: auto;
         }
 
         table {
             width: 100%;
+            min-width: 1250px;
+
             border-collapse: collapse;
-            font-size: 14px;
+        }
+
+        thead {
+            background-color: #f8fafc;
         }
 
         th {
-            color: var(--muted);
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.05em;
-            text-align: left;
-            padding: 16px 24px;
+            padding: 0.95rem 1rem;
+
             border-bottom: 1px solid var(--border);
-            background: #f9fafb;
-            font-weight: 600;
+
+            color: #475569;
+            font-size: 0.75rem;
+            font-weight: 750;
+            letter-spacing: 0.055em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
         }
 
         td {
-            padding: 16px 24px;
+            padding: 1rem;
+
             border-bottom: 1px solid var(--border);
+
+            color: #334155;
+            font-size: 0.9rem;
+            line-height: 1.5;
             vertical-align: middle;
-            color: #374151;
         }
 
-        tr:last-child td {
-            border-bottom: none;
+        tbody tr {
+            transition: background-color 0.2s ease;
         }
 
-        tr:hover td {
-            background: #f8fafc;
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
         }
 
         .code-link {
-            font-family: monospace;
+            color: var(--primary);
+            font-weight: 750;
+            text-decoration: none;
+        }
+
+        .code-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .activation-name {
+            display: block;
+
+            max-width: 340px;
+
+            color: var(--text-main);
             font-weight: 700;
-            font-size: 14px;
+        }
+
+        .country-list {
+            display: block;
+
+            max-width: 230px;
         }
 
         .badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 0.35rem;
+
+            padding: 0.38rem 0.65rem;
+
+            border: 1px solid transparent;
             border-radius: 999px;
-            padding: 4px 12px;
-            font-size: 12px;
+
+            font-size: 0.74rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            background: var(--border);
-            color: var(--text);
+            line-height: 1;
+            white-space: nowrap;
         }
 
-        .badge.green { background: var(--green-bg); color: var(--green); }
-        .badge.red { background: var(--red-bg); color: var(--red); }
-        .badge.blue { background: var(--light-blue); color: var(--blue); }
+        .badge.blue {
+            border-color: #bae6fd;
+            background-color: #f0f9ff;
+            color: #0369a1;
+        }
+
+        .badge.green {
+            border-color: var(--success-border);
+            background-color: var(--success-bg);
+            color: var(--success);
+        }
+
+        .badge.red {
+            border-color: var(--danger-border);
+            background-color: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .badge.neutral {
+            border-color: var(--border);
+            background-color: #f8fafc;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+            background-color: currentColor;
+        }
 
         .button {
-            border: 1px solid var(--border);
-            background: white;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: #374151;
-            transition: all 0.15s;
-        }
+            gap: 0.45rem;
 
-        .button:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
+            min-height: 38px;
+            padding: 0.55rem 0.8rem;
+
+            border: 1px solid transparent;
+            border-radius: 0.65rem;
+
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1;
+            text-decoration: none;
+            white-space: nowrap;
+
+            transition:
+                background-color 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
         }
 
         .button.primary {
-            background: var(--blue);
-            border-color: var(--blue);
+            background-color: var(--primary);
             color: white;
         }
 
         .button.primary:hover {
-            background: #1d4ed8;
-            border-color: #1d4ed8;
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
         }
 
         .empty-state {
-            padding: 60px 40px;
+            padding: 4rem 1rem;
+
+            color: var(--text-muted);
             text-align: center;
-            color: var(--muted);
-            font-size: 15px;
         }
 
-        @media (max-width: 768px) {
+        .empty-state i {
+            display: block;
+
+            margin-bottom: 0.8rem;
+
+            color: #94a3b8;
+            font-size: 2rem;
+        }
+
+        .mobile-menu-button {
+            display: none;
+
+            width: 42px;
+            height: 42px;
+
+            border: 1px solid var(--border);
+            border-radius: 0.7rem;
+
+            background-color: white;
+            color: var(--text-main);
+
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1100px) {
             .topbar {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 20px;
+                flex-wrap: wrap;
+                gap: 1rem;
+
+                padding-top: 0.8rem;
+                padding-bottom: 0.8rem;
             }
+
             .nav-links {
+                order: 3;
+
                 width: 100%;
-                justify-content: space-between;
+                margin-left: 0;
                 overflow-x: auto;
-                padding-bottom: 4px;
             }
-            .search-box {
+
+            .search-wrapper {
+                width: 240px;
+                margin-left: auto;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .topbar {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+
+            .brand-text small {
+                display: none;
+            }
+
+            .search-wrapper {
+                order: 3;
+
                 width: 100%;
             }
+
+            .nav-links {
+                order: 4;
+            }
+
             .page {
-                padding: 24px 16px;
+                width: min(100% - 2rem, 1500px);
+                padding-top: 2.5rem;
+            }
+
+            .page-header {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .header-stat {
+                width: 100%;
             }
         }
     </style>
 </head>
 
 <body>
+
     <header class="topbar">
-        <div class="brand">
-            <div class="brand-icon">⛰️</div>
+
+        <a
+            class="brand"
+            href="{% url 'proximity_alerts:activation_home' %}"
+        >
+            <div class="brand-icon">
+                <i class="bi bi-globe-europe-africa"></i>
+            </div>
+
             <div class="brand-text">
                 <div>Proximity Alerts</div>
                 <small>CEMS Rapid Mapping</small>
             </div>
-        </div>
+        </a>
 
         <nav class="nav-links">
-            <a href="#">Dashboard</a>
-            <a href="#" class="active">Activations</a>
-            <a href="#">AOIs</a>
-            <a href="#">Products</a>
-            <a href="#">Map</a>
+            <a href="{% url 'proximity_alerts:activation_home' %}">
+                Home
+            </a>
+
+            <a
+                href="{% url 'proximity_alerts:activation_list' %}"
+                class="active"
+            >
+                Activations
+            </a>
+
+            <a href="{% url 'proximity_alerts:activation_home' %}#activation-distribution">
+                Map
+            </a>
         </nav>
 
-        <input class="search-box" type="search" placeholder="Search activation...">
+        <div class="search-wrapper">
+            <i class="bi bi-search"></i>
+
+            <input
+                id="activation-search"
+                class="search-box"
+                type="search"
+                placeholder="Search activation..."
+                autocomplete="off"
+                aria-label="Search activations"
+            >
+        </div>
+
     </header>
 
     <main class="page">
+
         <div class="page-header">
-            <h1>CEMS Rapid Mapping Activations</h1>
+
+            <div>
+                <div class="page-label">
+                    Rapid Mapping catalogue
+                </div>
+
+                <h1>
+                    CEMS Rapid Mapping Activations
+                </h1>
+
+                <p class="page-description">
+                    Browse imported Copernicus Emergency Management Service
+                    Rapid Mapping activations, product availability and basic
+                    event information.{{ timestamp}}.
+                </p>
+            </div>
+
+            <div class="header-stat">
+                <div class="header-stat-label">
+                    Available activations
+                </div>
+
+                <div class="header-stat-value">
+                    {{ activations|length }}  
+                                    
+                </div>
+            </div>
+
         </div>
 
         <div class="card">
+
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">
+                        Activation catalogue
+                    </h2>
+
+                    <div class="card-subtitle">
+                        Select an activation code to open its detailed dashboard.
+                    </div>
+                </div>
+
+                <div
+                    id="result-count"
+                    class="result-count"
+                >
+                    {{ activations|length }} records
+                </div>
+            </div>
+
             <div class="table-wrap">
-                <table>
+
+                <table id="activation-table">
+
                     <thead>
                         <tr>
                             <th>Code</th>
@@ -304,68 +714,179 @@
                             <th>Category</th>
                             <th>Sub-category</th>
                             <th>Country</th>
-                            <th>Activation Time</th>
+                            <th>Activation time</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
 
                     <tbody>
+
                         {% for activation in activations %}
-                        <tr>
-                            <td>
-                                <a class="code-link" href="{% url 'proximity_alerts:activation_detail' activation.code %}">
-                                    {{ activation.code }}
-                                </a>
-                            </td>
-                            <td><strong>{{ activation.name }}</strong></td>
-                            <td><span class="badge blue">{{ activation.category|default:"-" }}</span></td>
-                            <td>{{ activation.sub_category|default:"-" }}</td>
-                            <td>
-                                {% if activation.countries %}
-                                    {% for country in activation.countries %}
-                                        {% if country.name %}{{ country.name }}{% else %}{{ country }}{% endif %}{% if not forloop.last %}, {% endif %}
-                                    {% endfor %}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if activation.activation_time %}
-                                    {{ activation.activation_time|date:"Y-m-d H:i" }}
-                                {% else %}
-                                    -
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if activation.closed %}
-                                <span class="badge red">Closed</span>
-                                {% else %}
-                                <span class="badge green">Active</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if activation.products_path %}
-                                <a class="button primary" href="{{ activation.products_path }}" target="_blank" rel="noopener">
-                                    Download Latest
-                                </a>
-                                {% else %}
-                                <span class="badge" style="text-transform: none; font-weight: normal; background: none; border: 1px dashed var(--border);">No Product</span>
-                                {% endif %}
-                            </td>
-                        </tr>
+
+                            <tr class="activation-row">
+
+                                <td>
+                                    <a
+                                        class="code-link"
+                                        href="{% url 'proximity_alerts:activation_detail' activation.code %}"
+                                    >
+                                        {{ activation.code }}
+                                    </a>
+                                </td>
+
+                                <td>
+                                    <span class="activation-name">
+                                        {{ activation.name }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if activation.category %}
+                                        <span class="badge blue">
+                                            {{ activation.category }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge neutral">
+                                            Not specified
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {{ activation.sub_category|default:"-" }}
+                                </td>
+
+                                <td>
+                                    <span class="country-list">
+                                        {% if activation.countries %}
+
+                                            {% for country in activation.countries %}
+
+                                                {% if country.name %}
+                                                    {{ country.name }}
+                                                {% else %}
+                                                    {{ country }}
+                                                {% endif %}
+
+                                                {% if not forloop.last %}
+                                                    ,
+                                                {% endif %}
+
+                                            {% endfor %}
+
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if activation.activation_time %}
+                                        {{ activation.activation_time|date:"d M Y, H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if activation.closed %}
+
+                                        <span class="badge red">
+                                            <span class="status-dot"></span>
+                                            Closed
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge green">
+                                            <span class="status-dot"></span>
+                                            Active
+                                        </span>
+
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if activation.products_path %}
+
+                                        <a
+                                            class="button primary"
+                                            href="{{ activation.products_path }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <i class="bi bi-download"></i>
+                                            Download latest
+                                        </a>
+
+                                    {% else %}
+
+                                        <span class="badge neutral">
+                                            No product
+                                        </span>
+
+                                    {% endif %}
+                                </td>
+
+                            </tr>
+
                         {% empty %}
-                        <tr>
-                            <td colspan="8" class="empty-state">
-                                No activations found.
-                            </td>
-                        </tr>
+
+                            <tr>
+                                <td
+                                    colspan="8"
+                                    class="empty-state"
+                                >
+                                    <i class="bi bi-inbox"></i>
+                                    No activations found.
+                                </td>
+                            </tr>
+
                         {% endfor %}
+
                     </tbody>
+
                 </table>
+
             </div>
         </div>
-    </main>
-</body>
 
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const searchInput = document.getElementById("activation-search");
+            const rows = Array.from(
+                document.querySelectorAll(".activation-row")
+            );
+            const resultCount = document.getElementById("result-count");
+
+            searchInput.addEventListener("input", function () {
+                const query = searchInput.value
+                    .trim()
+                    .toLowerCase();
+
+                let visibleCount = 0;
+
+                rows.forEach(function (row) {
+                    const rowText = row.textContent.toLowerCase();
+                    const matches = rowText.includes(query);
+
+                    row.style.display = matches ? "" : "none";
+
+                    if (matches) {
+                        visibleCount += 1;
+                    }
+                });
+
+                resultCount.textContent =
+                    visibleCount === 1
+                        ? "1 record"
+                        : `${visibleCount} records`;
+            });
+        });
+    </script>
+
+</body>
 </html>

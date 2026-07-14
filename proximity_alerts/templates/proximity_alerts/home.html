@@ -1,0 +1,1510 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="description"
+        content="A portfolio Web GIS project for exploring Copernicus Emergency Management Service Rapid Mapping activations."
+    >
+
+    <title>
+        {% block title %}
+            CEMS Rapid Mapping Explorer
+        {% endblock %}
+    </title>
+
+    <!-- Bootstrap -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- Bootstrap Icons -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <!-- OpenLayers -->
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/ol@10.6.1/ol.css"
+    >
+
+    <style>
+        :root {
+            --primary: #155e75;
+            --primary-dark: #0c4a6e;
+            --primary-light: #ecfeff;
+            --secondary: #0f766e;
+            --background: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-main);
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.97);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+        }
+
+        .navbar-brand {
+            color: var(--primary-dark);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .navbar-brand:hover {
+            color: var(--primary);
+        }
+
+        .nav-link {
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        .hero-section {
+            min-height: 610px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background:
+                radial-gradient(
+                    circle at 90% 20%,
+                    rgba(8, 145, 178, 0.18),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 5% 80%,
+                    rgba(13, 148, 136, 0.12),
+                    transparent 32%
+                ),
+                linear-gradient(
+                    135deg,
+                    #f8fafc 0%,
+                    #ecfeff 52%,
+                    #f0fdfa 100%
+                );
+        }
+
+        .hero-section::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.2;
+            pointer-events: none;
+            background-image:
+                linear-gradient(
+                    rgba(14, 116, 144, 0.12) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(14, 116, 144, 0.12) 1px,
+                    transparent 1px
+                );
+            background-size: 45px 45px;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.85rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid #a5f3fc;
+            border-radius: 999px;
+            background-color: rgba(236, 254, 255, 0.9);
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .hero-title {
+            max-width: 760px;
+            font-size: clamp(2.5rem, 6vw, 4.8rem);
+            font-weight: 750;
+            line-height: 1.02;
+            letter-spacing: -0.055em;
+        }
+
+        .hero-title span {
+            color: var(--primary);
+        }
+
+        .hero-description {
+            max-width: 680px;
+            color: #475569;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .btn-primary-custom {
+            padding: 0.8rem 1.25rem;
+            border: none;
+            border-radius: 0.7rem;
+            background-color: var(--primary);
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-primary-custom:hover {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+
+        .btn-outline-custom {
+            padding: 0.8rem 1.25rem;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.7rem;
+            background-color: white;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .btn-outline-custom:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .hero-preview {
+            position: relative;
+            min-height: 420px;
+        }
+
+        .preview-card {
+            position: absolute;
+            top: 35px;
+            right: 0;
+            width: min(100%, 520px);
+            overflow: hidden;
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            border-radius: 1.25rem;
+            background-color: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 30px 65px rgba(15, 23, 42, 0.15);
+            transform: rotate(1.5deg);
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .window-dots {
+            display: flex;
+            gap: 0.35rem;
+        }
+
+        .window-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background-color: #cbd5e1;
+        }
+
+        #hero-map {
+            width: 100%;
+            height: 320px;
+            background-color: #e2e8f0;
+        }
+
+        .floating-stat {
+            position: absolute;
+            z-index: 4;
+            bottom: 22px;
+            left: -20px;
+            min-width: 180px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.9rem;
+            background-color: white;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.14);
+        }
+
+        .section-padding {
+            padding-top: 5rem;
+            padding-bottom: 5rem;
+        }
+
+        .section-label {
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .section-description {
+            max-width: 740px;
+            color: var(--text-muted);
+            line-height: 1.75;
+        }
+
+        .stat-card {
+            height: 100%;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            background-color: white;
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .stat-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            margin-bottom: 1.2rem;
+            border-radius: 0.75rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .stat-number {
+            margin-bottom: 0.25rem;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+        }
+
+        .feature-card {
+            height: 100%;
+            padding: 1.75rem;
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            background-color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .feature-card p {
+            margin-bottom: 0;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        .map-wrapper {
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            background-color: white;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+        }
+
+        .map-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        #activation-map {
+            width: 100%;
+            height: 520px;
+            background-color: #e2e8f0;
+        }
+
+        .activation-card {
+            display: block;
+            height: 100%;
+            padding: 1.3rem;
+            border: 1px solid var(--border);
+            border-radius: 0.9rem;
+            background-color: white;
+            color: inherit;
+            text-decoration: none;
+            transition:
+                transform 0.2s ease,
+                border-color 0.2s ease,
+                box-shadow 0.2s ease;
+        }
+
+        .activation-card:hover {
+            transform: translateY(-3px);
+            border-color: #67e8f9;
+            color: inherit;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .activation-code {
+            color: var(--primary);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .activation-title {
+            margin-top: 0.5rem;
+            margin-bottom: 0.7rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .activation-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .disclaimer {
+            border: 1px solid #bae6fd;
+            border-radius: 1rem;
+            background-color: #f0f9ff;
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            background-color: white;
+        }
+
+        .popup {
+            min-width: 220px;
+            padding: 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 0.65rem;
+            background-color: white;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.18);
+        }
+
+        .popup-code {
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .popup-title {
+            margin-top: 0.25rem;
+            margin-bottom: 0.45rem;
+            font-weight: 700;
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            border: 0;
+            background: transparent;
+            color: #64748b;
+        }
+
+        @media (max-width: 991px) {
+            .hero-section {
+                padding-top: 5rem;
+                padding-bottom: 5rem;
+            }
+
+            .hero-preview {
+                min-height: 390px;
+                margin-top: 2rem;
+            }
+
+            .preview-card {
+                position: relative;
+                top: auto;
+                right: auto;
+                transform: none;
+            }
+
+            .floating-stat {
+                left: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            #activation-map {
+                height: 420px;
+            }
+
+            .map-toolbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container py-2">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'proximity_alerts:activation_home' %}">
+            <span class="d-inline-flex align-items-center justify-content-center">
+                <i class="bi bi-globe-europe-africa fs-4"></i>
+            </span>
+
+            <span>CEMS Explorer</span>
+        </a>
+
+        <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#mainNavigation"
+            aria-controls="mainNavigation"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+        >
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div
+            class="collapse navbar-collapse"
+            id="mainNavigation"
+        >
+            <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                <li class="nav-item">
+                    <a
+                        class="nav-link active"
+                        href="{% url 'proximity_alerts:activation_home' %}"
+                    >
+                        Home
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link"
+                        href="{% url 'proximity_alerts:activation_list' %}"
+                    >
+                        Activations
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a
+                        class="nav-link"
+                        href="#activation-distribution"
+                    >
+                        Map
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main>
+
+    <!-- Hero -->
+    <section class="hero-section">
+        <div class="container hero-content">
+            <div class="row align-items-center g-5">
+
+                <div class="col-lg-7">
+                    <div class="hero-label">
+                        <i class="bi bi-code-slash"></i>
+                        Independent Web GIS portfolio project
+                    </div>
+
+                    <h1 class="hero-title">
+                        Explore Copernicus
+                        <span>Rapid Mapping</span>
+                        activations
+                    </h1>
+
+                    <p class="hero-description mt-4">
+                        An interactive Web GIS application for browsing,
+                        organising and visualising publicly available disaster
+                        mapping products from the <a
+                            href="https://mapping.emergency.copernicus.eu/about/how-to-harvest-cems-mapping-data/emergency-response-data/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >Copernicus Emergency Management Service</a>.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-3 mt-4">
+                        <a
+                            href="{% url 'proximity_alerts:activation_list' %}"
+                            class="btn btn-primary-custom"
+                        >
+                            Browse activations
+                            <i class="bi bi-arrow-right ms-2"></i>
+                        </a>
+
+                        <a
+                            href="#activation-distribution"
+                            class="btn btn-outline-custom"
+                        >
+                            <i class="bi bi-map me-2"></i>
+                            View distribution map
+                        </a>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-4 mt-5">
+                        <div>
+                            <div class="fw-bold">Django</div>
+                            <small class="text-secondary">Application backend</small>
+                        </div>
+
+                        <div>
+                            <div class="fw-bold">PostGIS</div>
+                            <small class="text-secondary">Spatial database</small>
+                        </div>
+
+                        <div>
+                            <div class="fw-bold">GeoServer</div>
+                            <small class="text-secondary">OGC web services</small>
+                        </div>
+
+                        <div>
+                            <div class="fw-bold">OpenLayers</div>
+                            <small class="text-secondary">Interactive mapping</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="hero-preview">
+                        <div class="preview-card">
+                            <div class="preview-header">
+                                <div class="window-dots">
+                                    <span class="window-dot"></span>
+                                    <span class="window-dot"></span>
+                                    <span class="window-dot"></span>
+                                </div>
+
+                                <small class="text-secondary">
+                                    Activation distribution
+                                </small>
+                            </div>
+
+                            <div id="hero-map"></div>
+                        </div>
+
+                        <div class="floating-stat">
+                            <small class="text-secondary d-block">
+                                Available activations
+                            </small>
+
+                            <strong class="fs-4">
+                                {{ total_activations|default:"0" }}
+                            </strong>
+                            
+       
+
+
+                            <div class="small text-success mt-1">
+                                <i class="bi bi-database-check me-1"></i>
+                                Imported into PostGIS. 
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics -->
+    <section class="section-padding">
+        <div class="container">
+            {% if timestamp %}
+                <div class="small text-secondary mb-3">
+                    <i class="bi bi-clock-history me-1"></i>
+                    Last import activity: {{ timestamp }}
+                </div>
+            {% endif %}
+
+            <div class="row g-4">
+                 
+
+                <div class="col-sm-6 col-xl-3">
+                   
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-lightning-charge"></i>
+                        </div>
+
+                        <div class="stat-number">
+                            {{ total_activations|default:"0" }}
+                        </div>
+
+                        <div class="stat-label">
+                            Rapid Mapping activations
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-bounding-box"></i>
+                        </div>
+
+                        <div class="stat-number">
+                            {{ total_aois|default:"0" }}
+                        </div>
+
+                        <div class="stat-label">
+                            Areas of Interest
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-layers"></i>
+                        </div>
+
+                        <div class="stat-number">
+                            {{ total_products|default:"0" }}
+                        </div>
+
+                        <div class="stat-label">
+                            Mapping products
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="bi bi-globe2"></i>
+                        </div>
+
+                        <div class="stat-number">
+                            {{ total_countries|default:"0" }}
+                        </div>
+
+                        <div class="stat-label">
+                            Countries represented
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- About -->
+    <section class="section-padding bg-white">
+        <div class="container">
+            <div class="row align-items-start g-5">
+
+                <div class="col-lg-5">
+                    <div class="section-label">About the project</div>
+
+                    <h2 class="section-title mt-2">
+                        Disaster mapping data presented through a modern Web GIS
+                    </h2>
+
+                    <p class="section-description mt-3">
+                        This personal project demonstrates how publicly
+                        available Copernicus Rapid Mapping data can be imported,
+                        organised, published and explored using open geospatial
+                        technologies.
+                    </p>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <div class="feature-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-cloud-arrow-down"></i>
+                                </div>
+
+                                <h3>Activation import</h3>
+
+                                <p>
+                                    Activation metadata, Areas of Interest,
+                                    products and versions are imported and
+                                    organised in a relational spatial database.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="feature-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-stack"></i>
+                                </div>
+
+                                <h3>Product layers</h3>
+
+                                <p>
+                                    Individual product datasets are published as
+                                    GeoServer layers and organised into product
+                                    layer groups for convenient display.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="feature-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-pin-map"></i>
+                                </div>
+
+                                <h3>Spatial exploration</h3>
+
+                                <p>
+                                    Users can explore the distribution of
+                                    activations and inspect their associated AOIs
+                                    and disaster mapping products.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="feature-card">
+                                <div class="stat-icon">
+                                    <i class="bi bi-diagram-3"></i>
+                                </div>
+
+                                <h3>Geospatial architecture</h3>
+
+                                <p>
+                                    The project combines Django, PostGIS,
+                                    GeoServer and OpenLayers in a containerised
+                                    Web GIS architecture.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Activation distribution map -->
+    <section
+        id="activation-distribution"
+        class="section-padding"
+    >
+        <div class="container">
+            <div class="section-label">Geographic overview</div>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+                <div>
+                    <h2 class="section-title mt-2 mb-2">
+                        Activation distribution
+                    </h2>
+
+                    <p class="section-description mb-0">
+                        The map shows the locations or extents of imported
+                        Copernicus Rapid Mapping activations.
+                    </p>
+                </div>
+
+                <a
+                    href="{% url 'proximity_alerts:activation_list' %}"
+                    class="btn btn-outline-custom"
+                >
+                    View all activations
+                </a>
+            </div>
+
+            <div class="map-wrapper">
+                <div class="map-toolbar">
+                    <div>
+                        <strong>Rapid Mapping activations</strong>
+
+                        <div class="small text-secondary">
+                            Select a feature to view activation details
+                        </div>
+                    </div>
+
+                    <span class="badge rounded-pill text-bg-light border">
+                        {{ total_activations|default:"0" }} activations
+                    </span>
+                </div>
+
+                <div id="activation-map"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent activations -->
+    <section class="section-padding bg-white">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+                <div>
+                    <div class="section-label">Latest data</div>
+
+                    <h2 class="section-title mt-2 mb-0">
+                        Recent activations
+                    </h2>
+                </div>
+
+                <a
+                    href="{% url 'proximity_alerts:activation_list' %}"
+                    class="text-decoration-none fw-semibold"
+                    style="color: var(--primary);"
+                >
+                    View complete list
+                    <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="row g-4">
+                {% for activation in recent_activations %}
+                    <div class="col-md-6 col-xl-4">
+                        <a
+                            href="{% url 'proximity_alerts:activation_detail' activation.code %}"
+                            class="activation-card"
+                        >
+                            <div class="d-flex justify-content-between align-items-start gap-3">
+                                <span class="activation-code">
+                                    {{ activation.code }}
+                                </span>
+
+                                {% if activation.category %}
+                                    <span class="badge rounded-pill text-bg-light border">
+                                        {{ activation.category }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <h3 class="activation-title">
+                                {{ activation.name }}
+                            </h3>
+
+                            <div class="activation-meta">
+                                {% if activation.countries %}
+                                    <span>
+                                        <i class="bi bi-geo-alt me-1"></i>
+
+                                        {% for country in activation.countries %}
+                                            {% if country.name %}
+                                                {{ country.name }}
+                                            {% else %}
+                                                {{ country }}
+                                            {% endif %}
+
+                                            {% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                {% endif %}
+
+                                {% if activation.activation_time %}
+                                    <span>
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        {{ activation.activation_time|date:"d M Y" }}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </a>
+                    </div>
+
+                {% empty %}
+                    <div class="col-12">
+                        <div class="text-center py-5 border rounded-4 bg-light">
+                            <i class="bi bi-inbox fs-1 text-secondary"></i>
+
+                            <h3 class="h5 mt-3">No activations imported yet</h3>
+
+                            <p class="text-secondary mb-0">
+                                Imported Rapid Mapping activations will appear
+                                here.
+                            </p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Data information -->
+    <section class="section-padding">
+        <div class="container">
+            <div class="disclaimer p-4 p-lg-5">
+                <div class="row align-items-start g-4">
+
+                    <div class="col-auto">
+                        <div class="stat-icon mb-0 bg-white">
+                            <i class="bi bi-info-circle"></i>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <h2 class="h4 fw-bold">About the data</h2>
+
+                        <p class="text-secondary lh-lg mb-3">
+                            The disaster mapping information displayed in this
+                            application is derived from publicly available
+                            products published by the Copernicus Emergency
+                            Management Service Rapid Mapping programme.
+                        </p>
+
+                        <p class="text-secondary lh-lg mb-0">
+                            Products represent conditions observed at the time
+                            the source imagery was acquired and analysed. This
+                            application is an independent portfolio project
+                            created for learning and demonstration purposes. It
+                            is not affiliated with or endorsed by the European
+                            Commission or the Copernicus Programme and should
+                            not be used as a substitute for official operational
+                            information.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="py-4">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+            <div>
+                <strong>CEMS Rapid Mapping Explorer</strong>
+
+                <div class="small text-secondary mt-1">
+                    Personal Web GIS portfolio project
+                </div>
+            </div>
+
+            <div class="small text-secondary">
+                Data source:
+                <a
+                    href="https://mapping.emergency.copernicus.eu/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Copernicus Emergency Management Service
+                </a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Popup -->
+<div
+    id="map-popup"
+    class="popup d-none"
+>
+    <button
+        id="popup-close"
+        class="popup-close"
+        type="button"
+        aria-label="Close"
+    >
+        &times;
+    </button>
+
+    <div id="popup-content"></div>
+</div>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+></script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/ol@10.6.1/dist/ol.js"
+></script>
+
+{{ activations_geojson|json_script:"activations-geojson-data" }}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const geojsonElement = document.getElementById(
+            "activations-geojson-data"
+        );
+
+        const heroMapElement = document.getElementById("hero-map");
+        const mainMapElement = document.getElementById("activation-map");
+
+        if (
+            !geojsonElement ||
+            !geojsonElement.textContent.trim()
+        ) {
+            console.warn("No activation GeoJSON data was provided.");
+            return;
+        }
+
+        let activationData;
+
+        try {
+            activationData = JSON.parse(
+                geojsonElement.textContent
+            );
+        } catch (error) {
+            console.error(
+                "Could not parse activation GeoJSON:",
+                error
+            );
+            return;
+        }
+
+        if (
+            !activationData ||
+            activationData.type !== "FeatureCollection" ||
+            !Array.isArray(activationData.features)
+        ) {
+            console.error(
+                "Activation data is not a valid GeoJSON FeatureCollection."
+            );
+            return;
+        }
+
+        const geojsonFormat = new ol.format.GeoJSON();
+
+        /*
+         * Read the data separately for each map. This avoids sharing the same
+         * feature instances between two vector sources.
+         */
+        const mainFeatures = geojsonFormat.readFeatures(
+            activationData,
+            {
+                dataProjection: "EPSG:4326",
+                featureProjection: "EPSG:3857"
+            }
+        );
+
+        const heroFeatures = geojsonFormat.readFeatures(
+            activationData,
+            {
+                dataProjection: "EPSG:4326",
+                featureProjection: "EPSG:3857"
+            }
+        );
+
+        const polygonStyle = new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: "rgba(103, 232, 249, 0.20)"
+            }),
+            stroke: new ol.style.Stroke({
+                color: "#155e75",
+                width: 1.8
+            })
+        });
+
+        const heroPolygonStyle = new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: "rgba(103, 232, 249, 0.16)"
+            }),
+            stroke: new ol.style.Stroke({
+                color: "#155e75",
+                width: 1.2
+            })
+        });
+
+        const pointStyle = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 7,
+                fill: new ol.style.Fill({
+                    color: "#155e75"
+                }),
+                stroke: new ol.style.Stroke({
+                    color: "#ffffff",
+                    width: 2
+                })
+            })
+        });
+
+        const heroPointStyle = new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 5,
+                fill: new ol.style.Fill({
+                    color: "#155e75"
+                }),
+                stroke: new ol.style.Stroke({
+                    color: "#ffffff",
+                    width: 1.5
+                })
+            })
+        });
+
+        function activationStyle(feature, isHeroMap) {
+            const geometry = feature.getGeometry();
+            const geometryType = geometry
+                ? geometry.getType()
+                : "";
+
+            if (
+                geometryType === "Point" ||
+                geometryType === "MultiPoint"
+            ) {
+                return isHeroMap
+                    ? heroPointStyle
+                    : pointStyle;
+            }
+
+            return isHeroMap
+                ? heroPolygonStyle
+                : polygonStyle;
+        }
+
+        let mainMap = null;
+        let heroMap = null;
+
+        /*
+         * Main activation map
+         */
+        if (mainMapElement) {
+            const mainSource = new ol.source.Vector({
+                features: mainFeatures
+            });
+
+            const mainVectorLayer = new ol.layer.Vector({
+                source: mainSource,
+                style: function (feature) {
+                    return activationStyle(feature, false);
+                }
+            });
+
+            mainMap = new ol.Map({
+                target: "activation-map",
+                layers: [
+                    new ol.layer.Tile({
+                        source: new ol.source.OSM()
+                    }),
+                    mainVectorLayer
+                ],
+                view: new ol.View({
+                    center: ol.proj.fromLonLat([15, 20]),
+                    zoom: 2
+                })
+            });
+
+            fitMapToSource(
+                mainMap,
+                mainSource,
+                6,
+                [60, 60, 60, 60]
+            );
+
+            setupMainMapPopup(mainMap);
+        }
+
+        /*
+         * Small non-interactive hero map
+         */
+        if (heroMapElement) {
+            const heroSource = new ol.source.Vector({
+                features: heroFeatures
+            });
+
+            const heroVectorLayer = new ol.layer.Vector({
+                source: heroSource,
+                style: function (feature) {
+                    return activationStyle(feature, true);
+                }
+            });
+
+            heroMap = new ol.Map({
+                target: "hero-map",
+                controls: [],
+                interactions: [],
+                layers: [
+                    new ol.layer.Tile({
+                        source: new ol.source.OSM()
+                    }),
+                    heroVectorLayer
+                ],
+                view: new ol.View({
+                    center: ol.proj.fromLonLat([15, 20]),
+                    zoom: 1.5
+                })
+            });
+
+            fitMapToSource(
+                heroMap,
+                heroSource,
+                3,
+                [28, 28, 28, 28]
+            );
+        }
+
+        window.setTimeout(function () {
+            if (mainMap) {
+                mainMap.updateSize();
+            }
+
+            if (heroMap) {
+                heroMap.updateSize();
+            }
+        }, 200);
+
+        function fitMapToSource(
+            mapInstance,
+            source,
+            maximumZoom,
+            padding
+        ) {
+            if (!source.getFeatures().length) {
+                return;
+            }
+
+            const extent = source.getExtent();
+
+            if (ol.extent.isEmpty(extent)) {
+                return;
+            }
+
+            mapInstance.getView().fit(extent, {
+                padding: padding,
+                maxZoom: maximumZoom,
+                duration: 500
+            });
+        }
+
+        function setupMainMapPopup(mapInstance) {
+            const popupElement =
+                document.getElementById("map-popup");
+
+            const popupContent =
+                document.getElementById("popup-content");
+
+            const popupClose =
+                document.getElementById("popup-close");
+
+            if (
+                !popupElement ||
+                !popupContent ||
+                !popupClose
+            ) {
+                return;
+            }
+
+            const popupOverlay = new ol.Overlay({
+                element: popupElement,
+                positioning: "bottom-center",
+                offset: [0, -12],
+                autoPan: {
+                    animation: {
+                        duration: 250
+                    }
+                }
+            });
+
+            mapInstance.addOverlay(popupOverlay);
+
+            popupClose.addEventListener(
+                "click",
+                function () {
+                    popupOverlay.setPosition(undefined);
+                    popupElement.classList.add("d-none");
+                }
+            );
+
+            mapInstance.on(
+                "singleclick",
+                function (event) {
+                    const feature =
+                        mapInstance.forEachFeatureAtPixel(
+                            event.pixel,
+                            function (selectedFeature) {
+                                return selectedFeature;
+                            }
+                        );
+
+                    if (!feature) {
+                        popupOverlay.setPosition(undefined);
+                        popupElement.classList.add("d-none");
+                        return;
+                    }
+
+                    const properties =
+                        feature.getProperties() || {};
+
+                    popupContent.innerHTML =
+                        createActivationPopup(properties);
+
+                    popupElement.classList.remove("d-none");
+                    popupOverlay.setPosition(event.coordinate);
+                }
+            );
+
+            mapInstance.on(
+                "pointermove",
+                function (event) {
+                    if (event.dragging) {
+                        return;
+                    }
+
+                    const hasFeature =
+                        mapInstance.hasFeatureAtPixel(
+                            event.pixel
+                        );
+
+                    mapInstance.getTargetElement().style.cursor =
+                        hasFeature
+                            ? "pointer"
+                            : "";
+                }
+            );
+        }
+
+        function createActivationPopup(properties) {
+            const code = escapeHtml(
+                properties.code || "Activation"
+            );
+
+            const name = escapeHtml(
+                properties.name || "Unnamed activation"
+            );
+
+            const category = properties.category
+                ? `
+                    <div>
+                        <b>Category:</b>
+                        ${escapeHtml(properties.category)}
+                    </div>
+                `
+                : "";
+
+            const countries = properties.countries
+                ? `
+                    <div>
+                        <b>Country:</b>
+                        ${escapeHtml(properties.countries)}
+                    </div>
+                `
+                : "";
+
+            const activationTime =
+                properties.activation_time
+                    ? `
+                        <div>
+                            <b>Activated:</b>
+                            ${formatDate(properties.activation_time)}
+                        </div>
+                    `
+                    : "";
+
+            const detailLink = properties.detail_url
+                ? `
+                    <a
+                        href="${escapeAttribute(
+                            properties.detail_url
+                        )}"
+                        style="
+                            display: inline-block;
+                            margin-top: 8px;
+                            color: #155e75;
+                            font-weight: 700;
+                            text-decoration: none;
+                        "
+                    >
+                        View activation
+                        <span aria-hidden="true">→</span>
+                    </a>
+                `
+                : "";
+
+            return `
+                <div class="popup-code">
+                    ${code}
+                </div>
+
+                <div class="popup-title">
+                    ${name}
+                </div>
+
+                ${category}
+                ${countries}
+                ${activationTime}
+                ${detailLink}
+            `;
+        }
+
+        function formatDate(value) {
+            const date = new Date(value);
+
+            if (Number.isNaN(date.getTime())) {
+                return escapeHtml(value);
+            }
+
+            return escapeHtml(
+                date.toLocaleString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "2-digit"
+                })
+            );
+        }
+
+        function escapeHtml(value) {
+            const element =
+                document.createElement("div");
+
+            element.textContent = String(value);
+
+            return element.innerHTML;
+        }
+
+        function escapeAttribute(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;");
+        }
+    });
+</script>
+
+</body>
+</html>

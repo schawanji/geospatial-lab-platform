@@ -7,118 +7,357 @@
     <title>{{ activation.code }} AOI {{ aoi.aoi_number }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
 
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg-main: #f8fafc;
-            --text-dark: #0f172a;
+            --primary: #155e75;
+            --primary-dark: #0c4a6e;
+            --primary-light: #ecfeff;
+            --secondary: #0f766e;
+
+            --background: #f8fafc;
+            --surface: #ffffff;
+
+            --text-main: #0f172a;
             --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --radius-lg: 16px;
-            --radius-md: 10px;
-            --radius-sm: 6px;
+
+            --border: #e2e8f0;
+
+            --success: #15803d;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+
+            --danger: #b91c1c;
+            --danger-bg: #fef2f2;
+            --danger-border: #fecaca;
+
+            --warning: #a16207;
+            --warning-bg: #fefce8;
+            --warning-border: #fde68a;
+
+            --info: #0369a1;
+            --info-bg: #f0f9ff;
+            --info-border: #bae6fd;
+
+            --shadow:
+                0 15px 35px rgba(15, 23, 42, 0.07);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
             margin: 0;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: var(--bg-main);
-            color: var(--text-dark);
+            background-color: var(--background);
+            color: var(--text-main);
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
             line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+
+            min-height: 72px;
+            padding: 0 2rem;
+
+            border-bottom: 1px solid var(--border);
+            background-color: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            min-width: max-content;
+            color: var(--primary-dark);
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 0.8rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-size: 1.25rem;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            font-size: 1rem;
+            font-weight: 750;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-text small {
+            margin-top: 0.2rem;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 500;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-left: auto;
+        }
+
+        .nav-links a {
+            position: relative;
+            padding: 0.75rem 0.9rem;
+            border-radius: 0.6rem;
+            color: #334155;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition:
+                color 0.2s ease,
+                background-color 0.2s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-links a.active::after {
+            content: "";
+            position: absolute;
+            right: 0.9rem;
+            bottom: 0.35rem;
+            left: 0.9rem;
+            height: 2px;
+            border-radius: 999px;
+            background-color: var(--primary);
+        }
+
+        .search-wrapper {
+            position: relative;
+            width: min(250px, 22vw);
+            min-width: 180px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 0.9rem;
+            color: var(--text-muted);
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .search-box {
+            width: 100%;
+            height: 42px;
+            padding: 0 0.9rem 0 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.7rem;
+            outline: none;
+            background-color: #f8fafc;
+            color: var(--text-main);
+            font: inherit;
+            font-size: 0.9rem;
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background-color 0.2s ease;
+        }
+
+        .search-box::placeholder {
+            color: #94a3b8;
+        }
+
+        .search-box:focus {
+            border-color: #67e8f9;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
         }
 
         .page {
-            max-width: 1400px;
+            width: min(1420px, calc(100% - 3rem));
             margin: 0 auto;
-            padding: 24px;
+            padding: 2.5rem 0 5rem;
         }
 
         .breadcrumb {
             display: inline-flex;
             align-items: center;
-            margin-bottom: 20px;
+            gap: 0.45rem;
+            margin-bottom: 1.4rem;
             color: var(--primary);
+            font-size: 0.86rem;
+            font-weight: 700;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: color 0.2s ease;
         }
 
         .breadcrumb:hover {
-            color: var(--primary-hover);
+            color: var(--primary-dark);
         }
 
         .hero {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: 24px 32px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .page-label {
+            margin-bottom: 0.55rem;
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 750;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
         }
 
         .hero h1 {
-            margin: 0 0 4px;
-            font-size: 28px;
-            letter-spacing: -0.02em;
-            font-weight: 800;
+            margin: 0;
+            color: var(--text-main);
+            font-size: clamp(2.25rem, 5vw, 3.8rem);
+            font-weight: 760;
+            line-height: 1.02;
+            letter-spacing: -0.055em;
         }
 
-        .muted {
+        .subtitle {
+            max-width: 760px;
+            margin: 0.8rem 0 0;
             color: var(--text-muted);
-            margin: 0;
-            font-size: 15px;
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+
+        .hero-stat {
+            min-width: 180px;
+            padding: 1rem 1.1rem;
+            border: 1px solid var(--border);
+            border-radius: 0.9rem;
+            background-color: white;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05);
+        }
+
+        .hero-stat-label {
+            color: var(--text-muted);
+            font-size: 0.76rem;
+        }
+
+        .hero-stat-value {
+            margin-top: 0.25rem;
+            color: var(--primary-dark);
+            font-size: 1.6rem;
+            font-weight: 760;
+            letter-spacing: -0.04em;
         }
 
         .layout {
             display: grid;
-            grid-template-columns: 1.3fr 0.7fr;
-            gap: 24px;
-            margin-bottom: 24px;
+            grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+            gap: 1.75rem;
+            margin-bottom: 2rem;
         }
 
         .card {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
             overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 1.1rem;
+            background-color: var(--surface);
+            box-shadow: var(--shadow);
         }
 
         .card-header {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 16px;
-            font-weight: 700;
-            background: #ffffff;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.05rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            background-color: white;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            font-size: 1rem;
+            font-weight: 750;
+        }
+
+        .card-title-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 0.65rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .card-subtitle {
+            margin-top: 0.2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
         }
 
         #aoi-map {
-            height: 480px;
+            height: 500px;
             width: 100%;
+            background-color: #e2e8f0;
             z-index: 1;
         }
 
-        /* Information list formatting for secondary metadata */
         .meta-list {
-            list-style: none;
-            padding: 0;
             margin: 0;
+            padding: 0;
+            list-style: none;
         }
 
         .meta-item {
             display: flex;
             justify-content: space-between;
-            padding: 14px 24px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
+            gap: 1.25rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.88rem;
         }
 
         .meta-item:last-child {
@@ -127,252 +366,647 @@
 
         .meta-label {
             color: var(--text-muted);
-            font-weight: 500;
+            font-weight: 550;
         }
 
         .meta-value {
-            font-weight: 600;
+            color: var(--text-main);
+            font-weight: 700;
             text-align: right;
         }
 
-        /* Table Optimization styles */
-        .table-wrap {
-            overflow-x: auto;
-            width: 100%;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            text-align: left;
-        }
-
-        th {
-            background: #f8fafc;
-            color: var(--text-muted);
-            padding: 12px 16px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            vertical-align: top;
-            white-space: nowrap;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .cell-stack div {
-            margin-bottom: 4px;
-            font-size: 13px;
-        }
-
-        .cell-stack div:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Small components UI */
         .badge {
             display: inline-flex;
             align-items: center;
-            padding: 2px 8px;
-            border-radius: var(--radius-sm);
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
+            gap: 0.35rem;
+            padding: 0.4rem 0.7rem;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
         }
 
         .badge.green {
-            background: #e2fbe8;
-            color: #1e7e34;
+            border-color: var(--success-border);
+            background-color: var(--success-bg);
+            color: var(--success);
         }
 
         .badge.red {
-            background: #ffebe9;
-            color: #d12420;
+            border-color: var(--danger-border);
+            background-color: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .badge.blue {
+            border-color: var(--info-border);
+            background-color: var(--info-bg);
+            color: var(--info);
+        }
+
+        .badge.yellow {
+            border-color: var(--warning-border);
+            background-color: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .badge.neutral {
+            border-color: var(--border);
+            background-color: #f8fafc;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: currentColor;
         }
 
         .button {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: var(--primary);
+            gap: 0.45rem;
+            min-height: 38px;
+            padding: 0.55rem 0.8rem;
+            border: 1px solid transparent;
+            border-radius: 0.65rem;
+            background-color: var(--primary);
             color: white;
-            padding: 6px 12px;
-            border-radius: var(--radius-sm);
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 13px;
-            transition: background 0.15s ease;
+            white-space: nowrap;
+            transition:
+                background-color 0.2s ease,
+                transform 0.2s ease;
         }
 
         .button:hover {
-            background: var(--primary-hover);
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1380px;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #f8fafc;
+        }
+
+        th {
+            padding: 0.95rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: #475569;
+            font-size: 0.72rem;
+            font-weight: 750;
+            letter-spacing: 0.055em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: #334155;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            vertical-align: top;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .product-type {
+            color: var(--text-main);
+            font-weight: 750;
+        }
+
+        .cell-stack {
+            display: grid;
+            gap: 0.4rem;
+        }
+
+        .cell-stack-item {
+            min-height: 25px;
+        }
+
+        .image-entry {
+            min-width: 180px;
+        }
+
+        .image-entry strong {
+            display: block;
+            color: var(--text-main);
+        }
+
+        .muted {
+            color: var(--text-muted);
         }
 
         .empty-state {
-            text-align: center;
-            padding: 48px !important;
+            padding: 4rem 1rem !important;
             color: var(--text-muted);
-            font-style: italic;
+            text-align: center;
         }
 
-        @media (max-width: 1024px) {
+        .empty-state i {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: #94a3b8;
+            font-size: 2rem;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 0.75rem;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+        }
+
+        .leaflet-popup-content {
+            margin: 0.85rem 1rem;
+        }
+
+        @media (max-width: 1150px) {
+            .topbar {
+                flex-wrap: wrap;
+                gap: 1rem;
+                padding-top: 0.8rem;
+                padding-bottom: 0.8rem;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                margin-left: 0;
+                overflow-x: auto;
+            }
+
+            .search-wrapper {
+                width: 240px;
+                margin-left: auto;
+            }
+
             .layout {
                 grid-template-columns: 1fr;
             }
+        }
+
+        @media (max-width: 700px) {
+            .topbar {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+
+            .brand-text small {
+                display: none;
+            }
+
+            .search-wrapper {
+                order: 3;
+                width: 100%;
+            }
+
+            .nav-links {
+                order: 4;
+            }
 
             .page {
-                padding: 16px;
+                width: min(100% - 2rem, 1420px);
+                padding-top: 1.75rem;
+            }
+
+            .hero {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .hero-stat {
+                width: 100%;
+            }
+
+            .meta-item {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+
+            .meta-value {
+                text-align: left;
             }
         }
     </style>
 </head>
 
 <body>
+    <header class="topbar">
+        <a class="brand" href="{% url 'proximity_alerts:activation_home' %}">
+            <div class="brand-icon">
+                <i class="bi bi-globe-europe-africa"></i>
+            </div>
+
+            <div class="brand-text">
+                <div>Proximity Alerts</div>
+                <small>CEMS Rapid Mapping</small>
+            </div>
+        </a>
+
+        <nav class="nav-links">
+            <a href="{% url 'proximity_alerts:activation_home' %}">
+                Home
+            </a>
+
+            <a
+                href="{% url 'proximity_alerts:activation_list' %}"
+                class="active"
+            >
+                Activations
+            </a>
+
+            <a href="{% url 'proximity_alerts:activation_home' %}#activation-distribution">
+                Map
+            </a>
+        </nav>
+
+        <div class="search-wrapper">
+            <i class="bi bi-search"></i>
+
+            <input
+                id="product-search"
+                class="search-box"
+                type="search"
+                placeholder="Search products..."
+                autocomplete="off"
+                aria-label="Search products"
+            >
+        </div>
+    </header>
+
     <main class="page">
-        <a class="breadcrumb" href="{% url 'proximity_alerts:activation_detail' activation.code %}">
-            ← Back to {{ activation.code }}
+        <a
+            class="breadcrumb"
+            href="{% url 'proximity_alerts:activation_detail' activation.code %}"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Back to {{ activation.code }}
         </a>
 
         <section class="hero">
-            <h1>{{ activation.code }} AOI {{ aoi.aoi_number }}</h1>
-            <p class="muted">
-                {{ aoi.aoi_name|default:"Unnamed area of interest" }}
-            </p>
+            <div>
+                <div class="page-label">
+                    Area of Interest
+                </div>
+
+                <h1>
+                    {{ activation.code }} · AOI {{ aoi.aoi_number|stringformat:"02d" }}
+                </h1>
+
+                <p class="subtitle">
+                    {{ aoi.aoi_name|default:"Unnamed area of interest" }}
+                </p>
+            </div>
+
+            <div class="hero-stat">
+                <div class="hero-stat-label">
+                    Linked products
+                </div>
+
+                <div class="hero-stat-value">
+                    {{ products|length }}
+                </div>
+            </div>
         </section>
 
         <section class="layout">
             <div class="card">
-                <div class="card-header">🗺️ AOI Map</div>
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">
+                            <span class="card-title-icon">
+                                <i class="bi bi-map"></i>
+                            </span>
+
+                            AOI map
+                        </div>
+
+                        <div class="card-subtitle">
+                            Imported geometry for this Area of Interest.
+                        </div>
+                    </div>
+
+                    <span class="badge blue">
+                        AOI {{ aoi.aoi_number|stringformat:"02d" }}
+                    </span>
+                </div>
+
                 <div id="aoi-map"></div>
             </div>
 
             <div class="card">
-                <div class="card-header">ℹ️ Information Summary</div>
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">
+                            <span class="card-title-icon">
+                                <i class="bi bi-info-circle"></i>
+                            </span>
+
+                            Information summary
+                        </div>
+
+                        <div class="card-subtitle">
+                            AOI metadata and available resources.
+                        </div>
+                    </div>
+                </div>
+
                 <div class="meta-list">
                     <div class="meta-item">
-                        <span class="meta-label">Activation Code</span>
+                        <span class="meta-label">Activation code</span>
                         <span class="meta-value">{{ activation.code }}</span>
                     </div>
+
                     <div class="meta-item">
-                        <span class="meta-label">AOI Number</span>
-                        <span class="meta-value">#{{ aoi.aoi_number }}</span>
+                        <span class="meta-label">AOI number</span>
+                        <span class="meta-value">
+                            #{{ aoi.aoi_number|stringformat:"02d" }}
+                        </span>
                     </div>
+
                     <div class="meta-item">
-                        <span class="meta-label">Total Linked Products</span>
+                        <span class="meta-label">AOI name</span>
+                        <span class="meta-value">
+                            {{ aoi.aoi_name|default:"Unnamed AOI" }}
+                        </span>
+                    </div>
+
+                    <div class="meta-item">
+                        <span class="meta-label">Area</span>
+                        <span class="meta-value">
+                            {% if aoi.sqkm %}
+                                {{ aoi.sqkm|floatformat:2 }} km²
+                            {% else %}
+                                -
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="meta-item">
+                        <span class="meta-label">Linked products</span>
                         <span class="meta-value">{{ products|length }}</span>
+                    </div>
+
+                    <div class="meta-item">
+                        <span class="meta-label">Base layer package</span>
+
+                        <span class="meta-value">
+                            {% if aoi.blp_path %}
+                                <a
+                                    class="button"
+                                    href="{{ aoi.blp_path }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <i class="bi bi-download"></i>
+                                    Download
+                                </a>
+                            {% else %}
+                                <span class="badge neutral">
+                                    Not available
+                                </span>
+                            {% endif %}
+                        </span>
                     </div>
                 </div>
             </div>
         </section>
 
         <section class="card">
-            <div class="card-header">📦 Products Matrix</div>
+            <div class="card-header">
+                <div>
+                    <div class="card-title">
+                        <span class="card-title-icon">
+                            <i class="bi bi-boxes"></i>
+                        </span>
+
+                        Products matrix
+                    </div>
+
+                    <div class="card-subtitle">
+                        Product versions, delivery status, layers and source imagery.
+                    </div>
+                </div>
+
+                <span
+                    id="product-result-count"
+                    class="badge neutral"
+                >
+                    {{ products|length }} records
+                </span>
+            </div>
 
             <div class="table-wrap">
-                <table>
+                <table id="product-table">
                     <thead>
                         <tr>
-                            <th>Product Type</th>
+                            <th>Product type</th>
                             <th>Monitoring</th>
-                            <th>Expected Delivery</th>
+                            <th>Expected delivery</th>
                             <th>Download</th>
                             <th>Layers</th>
                             <th>Version</th>
                             <th>Status</th>
                             <th>Reason</th>
-                            <th>Delivery Time</th>
+                            <th>Delivery time</th>
                             <th>Images</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {% for product in products %}
-                        <tr>
-                            <td>
-                                <strong>{{ product.product_type|default:"Unknown" }}</strong>
-                            </td>
-                            <td>
-                                {% if product.monitoring %}
-                                Monitoring {{ product.monitoring_number|default:"-" }}
-                                {% else %}
-                                <span class="muted">No</span>
-                                {% endif %}
-                            </td>
-                            
-                            <td>
-                                {{ product.expected_delivery|date:"Y-m-d H:i"|default:"-" }}
-                            </td>
-                            <td>
-                                {% if product.download_path %}
-                                <a class="button" href="{{ product.download_path }}" target="_blank" rel="noopener">
-                                    Download
-                                </a>
-                                {% else %}
-                                <span class="muted">No package</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {{ product.layers.count|default:"0" }}
-                            </td>
-                            <td class="cell-stack">
-                                {% for version in product.versions.all %}
-                                <div>{{ version.number }}</div>
-                                {% empty %}
-                                <span class="muted">-</span>
-                                {% endfor %}
-                            </td>
-                            <td class="cell-stack">
-                               
-                              
-                            </td>
-                            <td class="cell-stack">
-                                {% for version in product.versions.all %}
-                                <div>{{ version.reason|default:"-" }}</div>
-                                {% empty %}
-                                <span class="muted">-</span>
-                                {% endfor %}
-                            </td>
-                            <td class="cell-stack">
-                                {% for version in product.versions.all %}
-                                <div>{{ version.delivery_time|date:"Y-m-d H:i"|default:"-" }}</div>
-                                {% empty %}
-                                <span class="muted">-</span>
-                                {% endfor %}
-                            </td>
-                            <td class="cell-stack">
-                                {% for image in product.images.all %}
-                                <div>
-                                    <strong>
-                                        {{ image.sensor_type|default:"-" }}
-                                    </strong> 
-                                    {{image.sensor_name|default:"-" }}
-                                    <br>
-                                    <small class="muted">
-                                        {{ image.acquisition_time|date:"Y-m-d H:i"|default:"-"}}
-                                    </small>
-                                </div>
-                                {% empty %}
-                                <span class="muted">-</span>
-                                {% endfor %}
-                            </td>
-                        </tr>
+                            <tr class="product-row">
+                                <td>
+                                    <span class="product-type">
+                                        {{ product.product_type|default:"Unknown" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if product.monitoring %}
+                                        <span class="badge blue">
+                                            Monitoring {{ product.monitoring_number|default:"-" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge neutral">
+                                            No
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if product.expected_delivery %}
+                                        {{ product.expected_delivery|date:"d M Y, H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if product.download_path %}
+                                        <a
+                                            class="button"
+                                            href="{{ product.download_path }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <i class="bi bi-download"></i>
+                                            Download
+                                        </a>
+                                    {% else %}
+                                        <span class="badge neutral">
+                                            No package
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <span class="badge blue">
+                                        {{ product.layers.count|default:"0" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="cell-stack">
+                                        {% for version in product.versions.all %}
+                                            <div class="cell-stack-item">
+                                                {{ version.number|default:"-" }}
+                                            </div>
+                                        {% empty %}
+                                            <span class="muted">-</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="cell-stack">
+                                        {% for version in product.versions.all %}
+                                            <div class="cell-stack-item">
+                                                {% if version.status_code == "F" %}
+                                                    <span class="badge green">
+                                                        <span class="status-dot"></span>
+                                                        Finished
+                                                    </span>
+                                                {% elif version.status_code == "W" %}
+                                                    <span class="badge yellow">
+                                                        <span class="status-dot"></span>
+                                                        Waiting
+                                                    </span>
+                                                {% elif version.status_code == "I" %}
+                                                    <span class="badge blue">
+                                                        <span class="status-dot"></span>
+                                                        In progress
+                                                    </span>
+                                                {% elif version.status_code == "N" %}
+                                                    <span class="badge red">
+                                                        <span class="status-dot"></span>
+                                                        Not feasible
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge neutral">
+                                                        {{ version.status_code|default:"Unknown" }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        {% empty %}
+                                            <span class="muted">-</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="cell-stack">
+                                        {% for version in product.versions.all %}
+                                            <div class="cell-stack-item">
+                                                {{ version.reason|default:"-" }}
+                                            </div>
+                                        {% empty %}
+                                            <span class="muted">-</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="cell-stack">
+                                        {% for version in product.versions.all %}
+                                            <div class="cell-stack-item">
+                                                {% if version.delivery_time %}
+                                                    {{ version.delivery_time|date:"d M Y, H:i" }}
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            </div>
+                                        {% empty %}
+                                            <span class="muted">-</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <div class="cell-stack">
+                                        {% for image in product.images.all %}
+                                            <div class="image-entry">
+                                                <strong>
+                                                    {{ image.sensor_type|default:"Unknown sensor" }}
+                                                </strong>
+
+                                                <span>
+                                                    {{ image.sensor_name|default:"-" }}
+                                                </span>
+
+                                                <div class="muted">
+                                                    {% if image.acquisition_time %}
+                                                        {{ image.acquisition_time|date:"d M Y, H:i" }}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% empty %}
+                                            <span class="muted">-</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                            </tr>
                         {% empty %}
-                        <tr>
-                            <td colspan="11" class="empty-state">
-                                No products imported for this activation.
-                            </td>
-                        </tr>
+                            <tr>
+                                <td
+                                    colspan="10"
+                                    class="empty-state"
+                                >
+                                    <i class="bi bi-inbox"></i>
+                                    No products imported for this AOI.
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -380,50 +1014,140 @@
         </section>
     </main>
 
-   
+    {{ aoi_geojson|json_script:"aoi-geojson" }}
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <script>
-        const map = L.map("aoi-map").setView([0, 0], 2);
+        document.addEventListener("DOMContentLoaded", function () {
+            const map = L.map("aoi-map", {
+                scrollWheelZoom: true
+            }).setView([0, 0], 2);
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            maxZoom: 19,
-            attribution: "&copy; OpenStreetMap contributors"
-        }).addTo(map);
-
-        const geojsonEl = document.getElementById("aoi-geojson");
-
-        if (geojsonEl) {
-            try {
-                const data = JSON.parse(geojsonEl.textContent);
-                if (data && Object.keys(data).length > 0) {
-                    const layer = L.geoJSON(data, {
-                        style: {
-                            color: "#2563eb",
-                            weight: 2,
-                            fillColor: "#93c5fd",
-                            fillOpacity: 0.35
-                        },
-                        onEachFeature: function (feature, layer) {
-                            const props = feature.properties || {};
-                            layer.bindPopup(`
-                                <div style="font-family: inherit; font-size: 13px;">
-                                    <strong style="font-size: 14px;">${props.aoi_name || "AOI"}</strong><br>
-                                    <span style="color: #64748b;">AOI number:</span> ${props.aoi_number || "-"}<br>
-                                    <span style="color: #64748b;">Area:</span> ${props.sqkm || "-"} km²
-                                </div>
-                            `);
-                        }
-                    }).addTo(map);
-
-                    const bounds = layer.getBounds();
-                    if (bounds.isValid()) {
-                        map.fitBounds(bounds, { padding: [30, 30] });
-                    }
+            L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    maxZoom: 19,
+                    attribution:
+                        "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
                 }
-            } catch (e) {
-                console.error("Failed to parse or render GeoJSON data:", e);
+            ).addTo(map);
+
+            setTimeout(function () {
+                map.invalidateSize();
+            }, 200);
+
+            const geojsonEl =
+                document.getElementById("aoi-geojson");
+
+            if (geojsonEl && geojsonEl.textContent.trim()) {
+                try {
+                    const data = JSON.parse(geojsonEl.textContent);
+
+                    if (data && Object.keys(data).length > 0) {
+                        const layer = L.geoJSON(data, {
+                            style: {
+                                color: "#155e75",
+                                weight: 2,
+                                fillColor: "#67e8f9",
+                                fillOpacity: 0.22
+                            },
+
+                            onEachFeature: function (feature, layer) {
+                                const props = feature.properties || {};
+
+                                layer.bindPopup(`
+                                    <div style="
+                                        min-width: 190px;
+                                        font-family: Inter, system-ui, sans-serif;
+                                        font-size: 13px;
+                                        line-height: 1.5;
+                                    ">
+                                        <strong style="
+                                            display: block;
+                                            margin-bottom: 5px;
+                                            color: #0f172a;
+                                            font-size: 14px;
+                                        ">
+                                            ${escapeHtml(props.aoi_name || "AOI")}
+                                        </strong>
+
+                                        <div>
+                                            <b>AOI number:</b>
+                                            ${escapeHtml(props.aoi_number || "-")}
+                                        </div>
+
+                                        <div>
+                                            <b>Area:</b>
+                                            ${escapeHtml(props.sqkm || "-")} km²
+                                        </div>
+                                    </div>
+                                `);
+                            }
+                        }).addTo(map);
+
+                        const bounds = layer.getBounds();
+
+                        if (bounds.isValid()) {
+                            map.fitBounds(bounds, {
+                                padding: [30, 30],
+                                maxZoom: 11
+                            });
+                        }
+                    }
+                } catch (error) {
+                    console.error(
+                        "Failed to parse or render AOI GeoJSON:",
+                        error
+                    );
+                }
             }
-        }
+
+            const searchInput =
+                document.getElementById("product-search");
+
+            const rows = Array.from(
+                document.querySelectorAll(".product-row")
+            );
+
+            const resultCount =
+                document.getElementById("product-result-count");
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function () {
+                    const query = searchInput.value
+                        .trim()
+                        .toLowerCase();
+
+                    let visibleCount = 0;
+
+                    rows.forEach(function (row) {
+                        const matches = row.textContent
+                            .toLowerCase()
+                            .includes(query);
+
+                        row.style.display = matches ? "" : "none";
+
+                        if (matches) {
+                            visibleCount += 1;
+                        }
+                    });
+
+                    if (resultCount) {
+                        resultCount.textContent =
+                            visibleCount === 1
+                                ? "1 record"
+                                : `${visibleCount} records`;
+                    }
+                });
+            }
+
+            function escapeHtml(value) {
+                const div = document.createElement("div");
+                div.textContent = String(value);
+                return div.innerHTML;
+            }
+        });
     </script>
 </body>
 

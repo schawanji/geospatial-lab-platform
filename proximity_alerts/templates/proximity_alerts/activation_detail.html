@@ -7,471 +7,778 @@
     <title>{{ activation.code }} | CEMS Activation</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
 
     <style>
         :root {
-            --navy: #0f2742;
-            --blue: #2563eb;
-            --light-blue: #eff6ff;
-            --green: #16a34a;
-            --green-bg: #dcfce7;
-            --red: #dc2626;
-            --red-bg: #fee2e2;
-            --yellow: #ca8a04;
-            --yellow-bg: #fef9c3;
-            --border: #e5e7eb;
-            --text: #111827;
-            --muted: #6b7280;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+            --primary: #155e75;
+            --primary-dark: #0c4a6e;
+            --primary-light: #ecfeff;
+            --secondary: #0f766e;
+
+            --background: #f8fafc;
+            --surface: #ffffff;
+
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+
+            --border: #e2e8f0;
+
+            --success: #15803d;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+
+            --danger: #b91c1c;
+            --danger-bg: #fef2f2;
+            --danger-border: #fecaca;
+
+            --warning: #a16207;
+            --warning-bg: #fefce8;
+            --warning-border: #fde68a;
+
+            --info: #0369a1;
+            --info-bg: #f0f9ff;
+            --info-border: #bae6fd;
+
+            --shadow:
+                0 15px 35px rgba(15, 23, 42, 0.07);
         }
 
         * {
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             margin: 0;
-            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: var(--bg);
-            color: var(--text);
+            background-color: var(--background);
+            color: var(--text-main);
+            font-family:
+                Inter,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
             line-height: 1.5;
         }
 
         a {
-            color: var(--blue);
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        a:hover {
-            color: #1d4ed8;
+            color: inherit;
         }
 
         .topbar {
-            min-height: 72px;
-            background: linear-gradient(90deg, #081829, #12365a);
-            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 32px;
-            gap: 20px;
+            gap: 2rem;
+
+            min-height: 72px;
+            padding: 0 2rem;
+
+            border-bottom: 1px solid var(--border);
+            background-color: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            font-size: 18px;
+            gap: 0.8rem;
+            min-width: max-content;
+            color: var(--primary-dark);
+            text-decoration: none;
         }
 
         .brand-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
             width: 42px;
             height: 42px;
-            border-radius: 999px;
-            background: #f59e0b;
-            display: grid;
-            place-items: center;
-            font-size: 22px;
+
+            border-radius: 0.8rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+
+            font-size: 1.25rem;
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            font-size: 1rem;
+            font-weight: 750;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
         }
 
         .brand-text small {
-            color: #bfdbfe;
-            display: block;
-            font-weight: 400;
+            margin-top: 0.2rem;
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            font-weight: 500;
+            letter-spacing: 0;
         }
 
         .nav-links {
             display: flex;
-            gap: 28px;
-            font-size: 14px;
+            align-items: center;
+            gap: 0.35rem;
+            margin-left: auto;
         }
 
         .nav-links a {
-            color: #dbeafe;
-            padding-bottom: 4px;
-            border-bottom: 2px solid transparent;
+            position: relative;
+            padding: 0.75rem 0.9rem;
+            border-radius: 0.6rem;
+            color: #334155;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition:
+                color 0.2s ease,
+                background-color 0.2s ease;
         }
 
         .nav-links a:hover,
         .nav-links a.active {
-            color: white;
+            background-color: var(--primary-light);
+            color: var(--primary);
         }
 
-        .nav-links a.active {
-            border-bottom-color: #60a5fa;
+        .nav-links a.active::after {
+            content: "";
+            position: absolute;
+            right: 0.9rem;
+            bottom: 0.35rem;
+            left: 0.9rem;
+            height: 2px;
+            border-radius: 999px;
+            background-color: var(--primary);
+        }
+
+        .search-wrapper {
+            position: relative;
+            width: min(250px, 22vw);
+            min-width: 180px;
+        }
+
+        .search-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 0.9rem;
+            color: var(--text-muted);
+            transform: translateY(-50%);
+            pointer-events: none;
         }
 
         .search-box {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: white;
-            padding: 10px 14px;
-            border-radius: 10px;
-            width: 230px;
+            width: 100%;
+            height: 42px;
+            padding: 0 0.9rem 0 2.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.7rem;
             outline: none;
-            transition: background 0.2s;
+            background-color: #f8fafc;
+            color: var(--text-main);
+            font: inherit;
+            font-size: 0.9rem;
+            transition:
+                border-color 0.2s ease,
+                box-shadow 0.2s ease,
+                background-color 0.2s ease;
+        }
+
+        .search-box::placeholder {
+            color: #94a3b8;
         }
 
         .search-box:focus {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: #60a5fa;
+            border-color: #67e8f9;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(8, 145, 178, 0.1);
         }
 
         .page {
-            max-width: 1320px;
+            width: min(1420px, calc(100% - 3rem));
             margin: 0 auto;
-            padding: 28px 32px 60px;
+            padding: 2.5rem 0 5rem;
         }
 
         .breadcrumb {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            font-weight: 500;
+            gap: 0.45rem;
+            margin-bottom: 1.4rem;
+            color: var(--primary);
+            font-size: 0.86rem;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .breadcrumb:hover {
+            color: var(--primary-dark);
         }
 
         .hero {
             display: grid;
-            grid-template-columns: 1.3fr 1fr;
-            gap: 28px;
+            grid-template-columns: minmax(0, 1.25fr) minmax(360px, 0.85fr);
+            gap: 1.75rem;
             align-items: stretch;
-            margin-bottom: 32px;
         }
 
         .hero-left {
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            gap: 20px;
+            gap: 1.35rem;
+        }
+
+        .page-label {
+            margin-bottom: 0.55rem;
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 750;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
         }
 
         .header-row {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 0.9rem;
             flex-wrap: wrap;
         }
 
         h1 {
-            font-size: 34px;
             margin: 0;
-            color: #0f172a;
-            letter-spacing: -0.02em;
+            color: var(--text-main);
+            font-size: clamp(2.25rem, 5vw, 3.8rem);
+            font-weight: 760;
+            line-height: 1.02;
+            letter-spacing: -0.055em;
         }
 
         .subtitle {
-            color: var(--muted);
-            margin: 0;
-            font-size: 17px;
+            max-width: 780px;
+            margin: 0.85rem 0 0;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
         }
 
         .badge-container {
             display: flex;
-            gap: 8px;
+            gap: 0.55rem;
             flex-wrap: wrap;
+            margin-top: 1rem;
         }
 
         .badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 0.35rem;
+            padding: 0.4rem 0.7rem;
+            border: 1px solid transparent;
             border-radius: 999px;
-            padding: 6px 14px;
-            font-size: 12px;
+            font-size: 0.74rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            background: var(--border);
-            color: var(--text);
+            line-height: 1;
+            white-space: nowrap;
         }
 
         .badge.green {
-            background: var(--green-bg);
-            color: var(--green);
+            border-color: var(--success-border);
+            background-color: var(--success-bg);
+            color: var(--success);
         }
 
         .badge.red {
-            background: var(--red-bg);
-            color: var(--red);
+            border-color: var(--danger-border);
+            background-color: var(--danger-bg);
+            color: var(--danger);
         }
 
         .badge.blue {
-            background: var(--light-blue);
-            color: var(--blue);
+            border-color: var(--info-border);
+            background-color: var(--info-bg);
+            color: var(--info);
         }
 
         .badge.yellow {
-            background: var(--yellow-bg);
-            color: var(--yellow);
+            border-color: var(--warning-border);
+            background-color: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .badge.neutral {
+            border-color: var(--border);
+            background-color: #f8fafc;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: currentColor;
         }
 
         .card {
-            background: var(--card);
+            overflow: hidden;
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 1.1rem;
+            background-color: var(--surface);
             box-shadow: var(--shadow);
         }
 
         .info-card {
-            padding: 24px;
+            padding: 1.5rem;
         }
 
-        .info-card h3 {
-            margin: 0 0 20px 0;
-            font-size: 18px;
-            color: #0f172a;
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .info-card h2 {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 750;
         }
 
         .info-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 20px 28px;
+            gap: 1.25rem 1.5rem;
         }
 
         .info-item {
             display: flex;
-            gap: 12px;
+            gap: 0.75rem;
             align-items: flex-start;
+            min-width: 0;
+        }
+
+        .info-item.full-width {
+            grid-column: 1 / -1;
         }
 
         .info-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
-            background: var(--light-blue);
-            color: var(--blue);
-            display: grid;
-            place-items: center;
-            flex-shrink: 0;
-            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 38px;
+            width: 38px;
+            height: 38px;
+            border-radius: 0.7rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-size: 1rem;
         }
 
         .label {
-            color: var(--muted);
-            font-size: 11px;
+            margin-bottom: 0.2rem;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.065em;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 2px;
-            font-weight: 600;
         }
 
         .value {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1f2937;
+            color: #334155;
+            font-size: 0.9rem;
+            font-weight: 650;
             word-break: break-word;
+        }
+
+        .value-note {
+            display: block;
+            margin-top: 0.18rem;
+            color: var(--text-muted);
+            font-size: 0.76rem;
+            font-weight: 500;
+        }
+
+        .summary-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 1.4rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border);
         }
 
         .stats-card {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            overflow: hidden;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
         }
 
         .stat {
-            padding: 20px;
+            min-width: 0;
+            padding: 1.15rem;
             border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
 
         .stat:last-child {
             border-right: none;
         }
 
-        .stat-number {
-            font-size: 26px;
-            font-weight: 800;
-            margin-top: 4px;
-            color: #0f172a;
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 650;
         }
 
-        .stat-label {
-            color: var(--muted);
-            font-size: 13px;
-            font-weight: 500;
+        .stat-number {
+            margin-top: 0.3rem;
+            color: var(--text-main);
+            font-size: 1.65rem;
+            font-weight: 780;
+            letter-spacing: -0.04em;
         }
 
         .map-card {
-            overflow: hidden;
-            height: 100%;
-            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .map-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.15rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .map-card-title {
+            font-size: 0.95rem;
+            font-weight: 750;
+        }
+
+        .map-card-subtitle {
+            margin-top: 0.15rem;
+            color: var(--text-muted);
+            font-size: 0.76rem;
         }
 
         #activation-map {
-            height: 100%;
+            flex: 1;
+            min-height: 535px;
             width: 100%;
-            min-height: 400px;
+            background-color: #e2e8f0;
             z-index: 1;
         }
 
         .section {
-            margin-top: 32px;
+            margin-top: 2rem;
         }
 
         .section-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 24px;
+            gap: 1rem;
+            padding: 1.15rem 1.35rem;
             border-bottom: 1px solid var(--border);
         }
 
         .section-title {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 20px;
-            font-weight: 800;
-            color: #0f172a;
+            gap: 0.7rem;
+            font-size: 1rem;
+            font-weight: 750;
         }
 
-        .button {
-            border: 1px solid var(--border);
-            background: white;
-            padding: 9px 16px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
+        .section-title-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            color: #374151;
-            transition: all 0.15s;
+            width: 34px;
+            height: 34px;
+            border-radius: 0.65rem;
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .section-subtitle {
+            margin-top: 0.2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            min-height: 38px;
+            padding: 0.55rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 0.65rem;
+            background-color: white;
+            color: #334155;
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1;
+            text-decoration: none;
+            white-space: nowrap;
+            transition:
+                background-color 0.2s ease,
+                border-color 0.2s ease,
+                transform 0.2s ease;
         }
 
         .button:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
+            border-color: #cbd5e1;
+            background-color: #f8fafc;
+            transform: translateY(-1px);
         }
 
         .button.primary {
-            background: var(--blue);
-            border-color: var(--blue);
+            border-color: var(--primary);
+            background-color: var(--primary);
             color: white;
         }
 
         .button.primary:hover {
-            background: #1d4ed8;
-            border-color: #1d4ed8;
+            border-color: var(--primary-dark);
+            background-color: var(--primary-dark);
+        }
+
+        .button.secondary {
+            border-color: #bae6fd;
+            background-color: #f0f9ff;
+            color: #0369a1;
         }
 
         .table-wrap {
+            width: 100%;
             overflow-x: auto;
         }
 
         table {
             width: 100%;
+            min-width: 1080px;
             border-collapse: collapse;
-            font-size: 14px;
+        }
+
+        thead {
+            background-color: #f8fafc;
         }
 
         th {
-            color: var(--muted);
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.05em;
-            text-align: left;
-            padding: 16px 24px;
+            padding: 0.95rem 1rem;
             border-bottom: 1px solid var(--border);
-            background: #f9fafb;
-            font-weight: 600;
+            color: #475569;
+            font-size: 0.72rem;
+            font-weight: 750;
+            letter-spacing: 0.055em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
         }
 
         td {
-            padding: 16px 24px;
+            padding: 1rem;
             border-bottom: 1px solid var(--border);
+            color: #334155;
+            font-size: 0.88rem;
+            line-height: 1.5;
             vertical-align: middle;
-            color: #374151;
         }
 
-        tr:hover td {
-            background: #f8fafc;
+        tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .aoi-number {
+            color: var(--primary);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-weight: 750;
+        }
+
+        .aoi-name {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .layer-list {
+            display: grid;
+            gap: 0.25rem;
+        }
+
+        .layer-list-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            min-width: 180px;
+        }
+
+        .layer-list-item span:last-child {
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
         }
 
         .mini-map-thumb {
-            width: 84px;
-            height: 58px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #bfdbfe, #d1fae5);
-            border: 1px solid var(--border);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 56px;
+            border: 1px solid #bae6fd;
+            border-radius: 0.65rem;
+            background:
+                linear-gradient(rgba(21, 94, 117, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(21, 94, 117, 0.08) 1px, transparent 1px),
+                linear-gradient(135deg, #ecfeff, #f0fdfa);
+            background-size: 12px 12px, 12px 12px, auto;
+            color: var(--primary);
+            font-size: 1.05rem;
         }
 
         .empty-state {
-            padding: 60px 40px;
+            padding: 4rem 1rem;
+            color: var(--text-muted);
             text-align: center;
-            color: var(--muted);
-            font-size: 15px;
         }
 
-        @media (max-width: 1024px) {
+        .empty-state i {
+            display: block;
+            margin-bottom: 0.75rem;
+            color: #94a3b8;
+            font-size: 2rem;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 0.75rem;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+        }
+
+        .leaflet-popup-content {
+            margin: 0.85rem 1rem;
+        }
+
+        @media (max-width: 1150px) {
+            .topbar {
+                flex-wrap: wrap;
+                gap: 1rem;
+                padding-top: 0.8rem;
+                padding-bottom: 0.8rem;
+            }
+
+            .nav-links {
+                order: 3;
+                width: 100%;
+                margin-left: 0;
+                overflow-x: auto;
+            }
+
+            .search-wrapper {
+                width: 240px;
+                margin-left: auto;
+            }
+
             .hero {
                 grid-template-columns: 1fr;
             }
 
-            .stats-card {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .stat:nth-child(3) {
-                border-right: none;
+            #activation-map {
+                min-height: 440px;
             }
         }
 
-        @media (max-width: 768px) {
-            .topbar {
-                flex-direction: column;
-                align-items: flex-start;
-                padding: 20px;
-            }
-
-            .nav-links {
-                width: 100%;
-                justify-content: space-between;
-                overflow-x: auto;
-                padding-bottom: 4px;
-            }
-
-            .search-box {
-                width: 100%;
-            }
-
+        @media (max-width: 850px) {
             .stats-card {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .stat {
-                border-right: 1px solid var(--border);
+                border-bottom: 1px solid var(--border);
             }
 
             .stat:nth-child(even) {
                 border-right: none;
             }
+
+            .stat:last-child {
+                grid-column: 1 / -1;
+                border-bottom: none;
+            }
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 700px) {
+            .topbar {
+                padding-right: 1rem;
+                padding-left: 1rem;
+            }
+
+            .brand-text small {
+                display: none;
+            }
+
+            .search-wrapper {
+                order: 3;
+                width: 100%;
+            }
+
+            .nav-links {
+                order: 4;
+            }
+
             .page {
-                padding: 20px 16px 44px;
+                width: min(100% - 2rem, 1420px);
+                padding-top: 1.75rem;
             }
 
             .info-grid {
                 grid-template-columns: 1fr;
             }
 
+            .info-item.full-width {
+                grid-column: auto;
+            }
+        }
+
+        @media (max-width: 520px) {
             .stats-card {
                 grid-template-columns: 1fr;
             }
 
-            .stat {
+            .stat,
+            .stat:nth-child(even),
+            .stat:last-child {
+                grid-column: auto;
                 border-right: none;
                 border-bottom: 1px solid var(--border);
             }
@@ -479,128 +786,253 @@
             .stat:last-child {
                 border-bottom: none;
             }
+
+            .section-header,
+            .info-card-header,
+            .map-card-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 
 <body>
     <header class="topbar">
-        <div class="brand">
-            <div class="brand-icon">⛰️</div>
+        <a class="brand" href="{% url 'proximity_alerts:activation_home' %}">
+            <div class="brand-icon">
+                <i class="bi bi-globe-europe-africa"></i>
+            </div>
+
             <div class="brand-text">
                 <div>Proximity Alerts</div>
                 <small>CEMS Rapid Mapping</small>
             </div>
-        </div>
+        </a>
 
-        <input class="search-box" type="search" placeholder="Search activation...">
+        <nav class="nav-links">
+            <a href="{% url 'proximity_alerts:activation_home' %}">
+                Home
+            </a>
+
+            <a
+                href="{% url 'proximity_alerts:activation_list' %}"
+                class="active"
+            >
+                Activations
+            </a>
+
+            <a href="{% url 'proximity_alerts:activation_home' %}#activation-distribution">
+                Map
+            </a>
+        </nav>
+
+        <div class="search-wrapper">
+            <i class="bi bi-search"></i>
+
+            <input
+                id="page-search"
+                class="search-box"
+                type="search"
+                placeholder="Search AOIs..."
+                autocomplete="off"
+                aria-label="Search AOIs"
+            >
+        </div>
     </header>
 
     <main class="page">
-        <a class="breadcrumb" href="{% url 'proximity_alerts:activation_list' %}">
-            ← Back to activations
+        <a
+            class="breadcrumb"
+            href="{% url 'proximity_alerts:activation_list' %}"
+        >
+            <i class="bi bi-arrow-left"></i>
+            Back to activations
         </a>
 
         <section class="hero">
             <div class="hero-left">
                 <div>
-                    <div class="header-row" style="margin-bottom: 12px;">
+                    <div class="page-label">
+                        Rapid Mapping activation
+                    </div>
+
+                    <div class="header-row">
                         <h1>{{ activation.code }}</h1>
+
                         {% if activation.closed %}
-                        <span class="badge red">Closed</span>
+                            <span class="badge red">
+                                <span class="status-dot"></span>
+                                Closed
+                            </span>
                         {% else %}
-                        <span class="badge green">Active</span>
+                            <span class="badge green">
+                                <span class="status-dot"></span>
+                                Active
+                            </span>
                         {% endif %}
                     </div>
 
-                    <p class="subtitle">{{ activation.name|default:"CEMS Rapid Mapping Activation" }}</p>
+                    <p class="subtitle">
+                        {{ activation.name|default:"CEMS Rapid Mapping Activation" }}
+                    </p>
 
-                    <div class="badge-container" style="margin-top: 14px;">
-                        <span class="badge blue">{{ activation.category|default:"Rapid Mapping" }}</span>
+                    <div class="badge-container">
+                        <span class="badge blue">
+                            {{ activation.category|default:"Rapid Mapping" }}
+                        </span>
+
                         {% if activation.sub_category %}
-                        <span class="badge blue">{{ activation.sub_category }}</span>
+                            <span class="badge blue">
+                                {{ activation.sub_category }}
+                            </span>
+                        {% endif %}
+
+                        {% if activation.sensitive %}
+                            <span class="badge yellow">
+                                <i class="bi bi-shield-lock"></i>
+                                Sensitive
+                            </span>
                         {% endif %}
                     </div>
                 </div>
 
                 <div class="card info-card">
-                    <h3>Activation Summary</h3>
+                    <div class="info-card-header">
+                        <div>
+                            <h2>Activation summary</h2>
+                            <div class="section-subtitle">
+                                Core metadata imported from the Rapid Mapping activation.
+                            </div>
+                        </div>
+
+                        <span class="badge neutral">
+                            {{ activation.source_api|default:"Rapid Mapping" }}
+                        </span>
+                    </div>
+
                     <div class="info-grid">
                         <div class="info-item">
-                            <div class="info-icon">🕒</div>
+                            <div class="info-icon">
+                                <i class="bi bi-clock-history"></i>
+                            </div>
+
                             <div>
-                                <div class="label">Event / Activation Time</div>
+                                <div class="label">Event time</div>
                                 <div class="value">
-                                    {{ activation.event_time|date:"Y-m-d H:i" }}<br>
-                                    <span style="font-weight: 400; font-size: 12px; color: var(--muted);">
-                                        Act: {{ activation.activation_time|date:"Y-m-d H:i" }}
+                                    {% if activation.event_time %}
+                                        {{ activation.event_time|date:"d M Y, H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+
+                                    <span class="value-note">
+                                        Activated:
+                                        {% if activation.activation_time %}
+                                            {{ activation.activation_time|date:"d M Y, H:i" }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="info-item">
-                            <div class="info-icon">🔐</div>
-                            <div>
-                                <div class="label">Sensitive</div>
-                                <div class="value">{% if activation.sensitive %}Yes{% else %}No{% endif %}</div>
+                            <div class="info-icon">
+                                <i class="bi bi-globe2"></i>
                             </div>
-                        </div>
 
-                        <div class="info-item">
-                            <div class="info-icon">🌍</div>
                             <div>
                                 <div class="label">Countries</div>
 
                                 <div class="value">
                                     {% for country in activation.countries %}
-                                    {% if country.name %}
-                                    {{ country.name }}
-                                    {% else %}
-                                    {{ country }}
-                                    {% endif %}{% if not forloop.last %}, {% endif %}
+                                        {% if country.name %}
+                                            {{ country.name }}
+                                        {% else %}
+                                            {{ country }}
+                                        {% endif %}
+
+                                        {% if not forloop.last %}, {% endif %}
                                     {% empty %}
-                                    -
+                                        -
                                     {% endfor %}
                                 </div>
                             </div>
                         </div>
 
                         <div class="info-item">
-                            <div class="info-icon">🧭</div>
+                            <div class="info-icon">
+                                <i class="bi bi-compass"></i>
+                            </div>
+
                             <div>
-                                <div class="label">Continent / Source</div>
+                                <div class="label">Continent</div>
                                 <div class="value">
-                                    {{ activation.continent|default:"-" }} <br>
-                                    <span style="font-weight: 400; font-size: 12px; color: var(--muted);">
-                                        {{ activation.source_api|default:"Rapid Mapping" }}
-                                    </span>
+                                    {{ activation.continent|default:"-" }}
                                 </div>
                             </div>
                         </div>
 
-                        <div class="info-item" style="grid-column: span 2;">
-                            <div class="info-icon">⚠️</div>
-                            <div>
-                                <div class="label">Reason</div>
-                                <div class="value">{{ activation.reason|default:"-" }}</div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i class="bi bi-shield-check"></i>
                             </div>
 
+                            <div>
+                                <div class="label">Sensitivity</div>
+                                <div class="value">
+                                    {% if activation.sensitive %}
+                                        Restricted metadata
+                                    {% else %}
+                                        Public
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
 
+                        <div class="info-item full-width">
+                            <div class="info-icon">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
 
-                        <div>
+                            <div>
+                                <div class="label">Reason</div>
+                                <div class="value">
+                                    {{ activation.reason|default:"-" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if activation.report_link or activation.products_path %}
+                        <div class="summary-actions">
                             {% if activation.report_link %}
-                            <a class="button primary" href="{{ activation.report_link }}" target="_blank" rel="noopener"
-                                style="padding: 6px 12px; width: 100%;">
-                                report_link
-                            </a>
-                            {% else %}
-                            <span class="badge" style="width: 100%; text-align: center;"></span>
+                                <a
+                                    class="button secondary"
+                                    href="{{ activation.report_link }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    Open report
+                                </a>
+                            {% endif %}
+
+                            {% if activation.products_path %}
+                                <a
+                                    class="button primary"
+                                    href="{{ activation.products_path }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <i class="bi bi-download"></i>
+                                    Download latest package
+                                </a>
                             {% endif %}
                         </div>
-
-                    </div>
+                    {% endif %}
                 </div>
 
                 <div class="card stats-card">
@@ -608,31 +1040,42 @@
                         <div class="stat-label">AOIs</div>
                         <div class="stat-number">{{ aois|length }}</div>
                     </div>
+
                     <div class="stat">
                         <div class="stat-label">Products</div>
                         <div class="stat-number">
-                            {{ non_n_versions_count }}
+                            {{ non_n_versions_count|default:"0" }}
                         </div>
-
                     </div>
+
                     <div class="stat">
                         <div class="stat-label">Layers</div>
                         <div class="stat-number">{{ layers|length }}</div>
                     </div>
+
                     <div class="stat">
                         <div class="stat-label">Images</div>
                         <div class="stat-number">{{ images|length }}</div>
                     </div>
+
                     <div class="stat">
                         <div class="stat-label">Package</div>
-                        <div class="stat-number" style="font-size: 14px;">
+
+                        <div class="stat-number" style="font-size: 0.82rem;">
                             {% if activation.products_path %}
-                            <a class="button primary" href="{{ activation.products_path }}" target="_blank"
-                                rel="noopener" style="padding: 6px 12px; width: 100%;">
-                                Download
-                            </a>
+                                <a
+                                    class="button primary"
+                                    href="{{ activation.products_path }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <i class="bi bi-download"></i>
+                                    Download
+                                </a>
                             {% else %}
-                            <span class="badge" style="width: 100%; text-align: center;">None</span>
+                                <span class="badge neutral">
+                                    None
+                                </span>
                             {% endif %}
                         </div>
                     </div>
@@ -640,77 +1083,147 @@
             </div>
 
             <div class="card map-card">
+                <div class="map-card-header">
+                    <div>
+                        <div class="map-card-title">
+                            Activation overview
+                        </div>
+
+                        <div class="map-card-subtitle">
+                            Activation extent and imported Areas of Interest.
+                        </div>
+                    </div>
+
+                    <span class="badge neutral">
+                        {{ aois|length }} AOIs
+                    </span>
+                </div>
+
                 <div id="activation-map"></div>
             </div>
         </section>
 
         <section class="section card">
             <div class="section-header">
-                <div class="section-title">📍 Areas of Interest</div>
-               
+                <div>
+                    <div class="section-title">
+                        <span class="section-title-icon">
+                            <i class="bi bi-bounding-box-circles"></i>
+                        </span>
+
+                        Areas of Interest
+                    </div>
+
+                    <div class="section-subtitle">
+                        Browse AOI packages, products and published layers.
+                    </div>
+                </div>
+
+                <span
+                    id="aoi-result-count"
+                    class="badge neutral"
+                >
+                    {{ aois|length }} records
+                </span>
             </div>
 
             <div class="table-wrap">
-                <table>
+                <table id="aoi-table">
                     <thead>
                         <tr>
                             <th>Preview</th>
-                            <th>AOI Number</th>
+                            <th>AOI number</th>
                             <th>Name</th>
-                            <th>BaseLayer Package</th>
+                            <th>Base layer package</th>
                             <th>Products</th>
                             <th>Layers</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {% for aoi in aois %}
-                        <tr>
-                            <td>
-                                <div class="mini-map-thumb"></div>
-                            </td>
-                            <td style="font-family: monospace; font-weight: 600;">
-                                {{ aoi.aoi_number|stringformat:"02d" }}
-                            </td>
-                            <td>
-                                <strong>{{ aoi.aoi_name|default:"Unnamed AOI" }}</strong>
-                            </td>
-                            <td>
-                                {% if aoi.blp_path %}
-                                <a class="button" href="{{ aoi.blp_path }}" target="_blank" rel="noopener">
-                                    Download Package
-                                </a>
-                                {% else %}
-                                <span class="badge" style="text-transform: none; font-weight: normal;">No package
-                                    Available</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {{ aoi.products.all|length}}
+                            <tr class="aoi-row">
+                                <td>
+                                    <div class="mini-map-thumb">
+                                        <i class="bi bi-map"></i>
+                                    </div>
+                                </td>
 
-                            </td>
-                            <td>
-                                {% for product in aoi.products.all %}
-                                <div>
-                                    {{ product.product_type }} : {{ product.layers.count }}
-                                </div>
-                                {% empty %}
-                                -
-                                {% endfor %}
-                            </td>
-                            <td>
-                                <a class="button primary"
-                                    href="{% url 'proximity_alerts:aoi_detail' activation.code aoi.aoi_number %}">
-                                    View Details
-                                </a>
-                            </td>
-                        </tr>
+                                <td>
+                                    <span class="aoi-number">
+                                        {{ aoi.aoi_number|stringformat:"02d" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="aoi-name">
+                                        {{ aoi.aoi_name|default:"Unnamed AOI" }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if aoi.blp_path %}
+                                        <a
+                                            class="button"
+                                            href="{{ aoi.blp_path }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <i class="bi bi-download"></i>
+                                            Download package
+                                        </a>
+                                    {% else %}
+                                        <span class="badge neutral">
+                                            No package
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <span class="badge blue">
+                                        {{ aoi.products.all|length }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="layer-list">
+                                        {% for product in aoi.products.all %}
+                                            <div class="layer-list-item">
+                                                <span>
+                                                    {{ product.product_type|default:"Product" }}
+                                                </span>
+
+                                                <span>
+                                                    {{ product.layers.count }}
+                                                </span>
+                                            </div>
+                                        {% empty %}
+                                            -
+                                        {% endfor %}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    <a
+                                        class="button primary"
+                                        href="{% url 'proximity_alerts:aoi_detail' activation.code aoi.aoi_number %}"
+                                    >
+                                        View details
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </td>
+                            </tr>
                         {% empty %}
-                        <tr>
-                            <td colspan="5" class="empty-state">
-                                No AOIs imported for this activation.
-                            </td>
-                        </tr>
+                            <tr>
+                                <td
+                                    colspan="7"
+                                    class="empty-state"
+                                >
+                                    <i class="bi bi-inbox"></i>
+                                    No AOIs imported for this activation.
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -718,81 +1231,192 @@
         </section>
     </main>
 
+    {{ activation_extent_geojson|json_script:"activation-extent-data" }}
+    {{ aois_geojson|json_script:"aois-data" }}
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        const map = L.map("activation-map", {
-            scrollWheelZoom: true
-        }).setView([44.5, 11.5], 7);
+        document.addEventListener("DOMContentLoaded", function () {
+            const map = L.map("activation-map", {
+                scrollWheelZoom: true
+            }).setView([20, 15], 2);
 
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-            maxZoom: 19,
-            attribution: "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
-        }).addTo(map);
-
-        // Fix Leaflet viewport bugs if container dimensions shift inside grid distributions
-        setTimeout(() => { map.invalidateSize(); }, 200);
-
-        const activationExtentEl = document.getElementById("activation-extent-data");
-        const aoisEl = document.getElementById("aois-data");
-
-        let bounds = null;
-
-        function addGeoJsonLayer(data, options) {
-            if (!data) return;
-            const layer = L.geoJSON(data, options).addTo(map);
-            try {
-                const layerBounds = layer.getBounds();
-                if (layerBounds.isValid()) {
-                    bounds = bounds ? bounds.extend(layerBounds) : layerBounds;
+            L.tileLayer(
+                "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+                    maxZoom: 19,
+                    attribution:
+                        "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
                 }
-            } catch (error) {
-                console.warn("Could not calculate layer bounds", error);
+            ).addTo(map);
+
+            setTimeout(function () {
+                map.invalidateSize();
+            }, 200);
+
+            const activationExtentEl =
+                document.getElementById("activation-extent-data");
+
+            const aoisEl =
+                document.getElementById("aois-data");
+
+            let bounds = null;
+
+            function extendBounds(layer) {
+                if (!layer || typeof layer.getBounds !== "function") {
+                    return;
+                }
+
+                const layerBounds = layer.getBounds();
+
+                if (!layerBounds.isValid()) {
+                    return;
+                }
+
+                bounds = bounds
+                    ? bounds.extend(layerBounds)
+                    : layerBounds;
             }
-        }
 
-        if (activationExtentEl && activationExtentEl.textContent.trim()) {
-            try {
-                const activationExtent = JSON.parse(activationExtentEl.textContent);
-                addGeoJsonLayer(activationExtent, {
-                    style: {
-                        color: "#2563eb",
-                        weight: 2,
-                        fillColor: "#93c5fd",
-                        fillOpacity: 0.22
+            function addGeoJsonLayer(data, options) {
+                if (!data) {
+                    return null;
+                }
+
+                const layer = L.geoJSON(data, options).addTo(map);
+                extendBounds(layer);
+                return layer;
+            }
+
+            if (
+                activationExtentEl &&
+                activationExtentEl.textContent.trim()
+            ) {
+                try {
+                    const activationExtent =
+                        JSON.parse(activationExtentEl.textContent);
+
+                    addGeoJsonLayer(activationExtent, {
+                        style: {
+                            color: "#155e75",
+                            weight: 2,
+                            fillColor: "#67e8f9",
+                            fillOpacity: 0.17
+                        }
+                    });
+                } catch (error) {
+                    console.error(
+                        "Error parsing activation extent GeoJSON",
+                        error
+                    );
+                }
+            }
+
+            if (aoisEl && aoisEl.textContent.trim()) {
+                try {
+                    const aois = JSON.parse(aoisEl.textContent);
+
+                    addGeoJsonLayer(aois, {
+                        style: {
+                            color: "#0f766e",
+                            weight: 2,
+                            fillColor: "#5eead4",
+                            fillOpacity: 0.22
+                        },
+
+                        onEachFeature: function (feature, layer) {
+                            const props = feature.properties || {};
+
+                            layer.bindPopup(`
+                                <div style="
+                                    min-width: 190px;
+                                    font-family: Inter, system-ui, sans-serif;
+                                    font-size: 13px;
+                                    line-height: 1.5;
+                                ">
+                                    <strong style="
+                                        display: block;
+                                        margin-bottom: 5px;
+                                        color: #0f172a;
+                                        font-size: 14px;
+                                    ">
+                                        ${escapeHtml(props.aoi_name || "AOI")}
+                                    </strong>
+
+                                    <div>
+                                        <b>AOI number:</b>
+                                        ${escapeHtml(props.aoi_number || "-")}
+                                    </div>
+
+                                    <div>
+                                        <b>Area:</b>
+                                        ${escapeHtml(props.sqkm || "-")} km²
+                                    </div>
+                                </div>
+                            `);
+                        }
+                    });
+                } catch (error) {
+                    console.error(
+                        "Error parsing AOI GeoJSON",
+                        error
+                    );
+                }
+            }
+
+            if (bounds && bounds.isValid()) {
+                map.fitBounds(bounds, {
+                    padding: [30, 30],
+                    maxZoom: 10
+                });
+            }
+
+            const searchInput =
+                document.getElementById("page-search");
+
+            const rows = Array.from(
+                document.querySelectorAll(".aoi-row")
+            );
+
+            const resultCount =
+                document.getElementById("aoi-result-count");
+
+            if (searchInput) {
+                searchInput.addEventListener("input", function () {
+                    const query = searchInput.value
+                        .trim()
+                        .toLowerCase();
+
+                    let visibleCount = 0;
+
+                    rows.forEach(function (row) {
+                        const matches = row.textContent
+                            .toLowerCase()
+                            .includes(query);
+
+                        row.style.display = matches ? "" : "none";
+
+                        if (matches) {
+                            visibleCount += 1;
+                        }
+                    });
+
+                    if (resultCount) {
+                        resultCount.textContent =
+                            visibleCount === 1
+                                ? "1 record"
+                                : `${visibleCount} records`;
                     }
                 });
-            } catch (e) { console.error("Error parsing activation extent GeoJSON", e); }
-        }
+            }
 
-        if (aoisEl && aoisEl.textContent.trim()) {
-            try {
-                const aois = JSON.parse(aoisEl.textContent);
-                addGeoJsonLayer(aois, {
-                    style: {
-                        color: "#16a34a",
-                        weight: 2,
-                        fillColor: "#86efac",
-                        fillOpacity: 0.28
-                    },
-                    onEachFeature: function (feature, layer) {
-                        const props = feature.properties || {};
-                        layer.bindPopup(`
-                            <div style="font-family: sans-serif; font-size:13px; line-height:1.4;">
-                                <strong style="font-size:14px; display:block; margin-bottom:4px;">${props.aoi_name || "AOI"}</strong>
-                                <b>AOI number:</b> ${props.aoi_number || "-"}<br>
-                                <b>Area:</b> ${props.sqkm || "-"} km²
-                            </div>
-                        `);
-                    }
-                });
-            } catch (e) { console.error("Error parsing AOI GeoJSON", e); }
-        }
-
-        if (bounds && bounds.isValid()) {
-            map.fitBounds(bounds, { padding: [30, 30] });
-        }
+            function escapeHtml(value) {
+                const div = document.createElement("div");
+                div.textContent = String(value);
+                return div.innerHTML;
+            }
+        });
     </script>
 </body>
 
